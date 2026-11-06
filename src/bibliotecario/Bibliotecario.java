@@ -1,5 +1,9 @@
 package bibliotecario;
+import Excepciones.LibroNoDisponible;
+import Excepciones.SinLibrosException;
+import Excepciones.SinUsuarioException;
 import Usuario.Usuario;
+import Enum.Disponibilidad;
 import java.util.HashMap;
 import java.util.Map;
 public class Bibliotecario {
@@ -68,5 +72,64 @@ public class Bibliotecario {
         this.reservas = reservas;
     }
     //metodos:
+    //metodos para agregar cada uno de los objetos por separado:
+    public boolean agregarUsuario(Usuario agregado){
+        if(usuarios.containsKey(agregado.getDni())){
+            return false;
+        }
+        usuarios.put(agregado.getDni(), agregado);
+        return true;
+    }
+    public boolean agregarLibro(Libro agregado){
+        if (libros.containsKey(agregado.getNombre()))
+        {
+            return false;
+        }
+        libros.put(agregado.getNombre(), agregado);
+
+        return true;
+    }
+    public boolean agregarPrestamo(String dni, String libroPrestamo)throws SinLibrosException, SinUsuarioException, LibroNoDisponible {
+        //primero buscamos al usuario y el libro a prestar.
+        Usuario usuarioBuscado = usuarios.get(dni);
+        Libro libro =  libros.get(libroPrestamo);
+        //si las casillas se dejan vacias se tira la excepcion.
+        if (libro == null){
+            throw new SinLibrosException("La casilla libro esta vacia.");
+        }
+        if (usuarioBuscado == null){
+            throw new SinUsuarioException("La casilla usuario esta vacia.");
+        }
+        //si el libro ya está prestado, avisa de su desponibilidad.
+        if (libro.getEstaDispponible() == Disponibilidad.PRESTADO){
+            throw new LibroNoDisponible("El libro ya esta prestado.");
+        }
+        //si el libro ya está reservado, primero busca si la persona que tiene la reserva
+        //es la misma que el nuevo usuario que quiere el prestamo ahora
+        if (libro.getEstaDispponible() == Disponibilidad.RESERVADO){
+
+            Reserva reserva = reservas.get(libroPrestamo);
+
+            //si no es la misma persona, tira la excepcion.
+            if (reserva == null || !reserva.getUsuario().equals(usuarioBuscado)){
+                throw new LibroNoDisponible("El libro esta reservado por otro usuario.");
+            }
+
+            //si si es la misma persona, elimina el libro de los reservados
+            reservas.remove(libroPrestamo);
+        }
+        //y se agrega a la desponibilidad de prestado.
+        libro.setEstaDispponible(Disponibilidad.PRESTADO);
+        return true;
+    }
+    public boolean agregarReservas(Reserva agregado){
+        if (reservas.containsKey(agregado.getNumeroReserva())){
+            return false;
+        }
+
+        reservas.put(agregado.getNumeroReserva(), agregado);
+
+        return true;
+    }
 
 }
