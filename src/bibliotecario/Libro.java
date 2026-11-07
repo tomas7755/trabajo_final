@@ -14,6 +14,7 @@ public final class Libro{
         this.numeroIdentificador = numeroIdentificador;
         this.nombre = nombre;
         this.autor = autor;
+        this.estaDispponible = Disponibilidad.DISPONIBLE;
     }
     public Libro(int numeroIdentificador, String nombre, String autor, Disponibilidad estaDispponible){
         this.numeroIdentificador = numeroIdentificador;

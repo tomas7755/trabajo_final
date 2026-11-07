@@ -9,7 +9,9 @@ public final class Reserva {
     private Libro libro;
     //constructor:
     public Reserva(){}
-    public Reserva(int numeroReserva){}
+    public Reserva(int numeroReserva){
+        this.numeroReserva = numeroReserva;
+    }
     public Reserva(int numeroReserva, Usuario usuario, Libro libro){
         this.numeroReserva = numeroReserva;
         this.usuario = usuario;
@@ -40,11 +42,11 @@ public final class Reserva {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Reserva reserva = (Reserva) o;
-        return Objects.equals(usuario, reserva.usuario);
+        return numeroReserva == reserva.numeroReserva;
     }
     @Override
     public int hashCode() {
-        return Objects.hashCode(usuario);
+        return Objects.hashCode(numeroReserva);
     }
     @Override
     public String toString() {
