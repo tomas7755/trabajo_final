@@ -59,11 +59,11 @@ public class VentanaBibliotecario {
 
         prestamos.setOnAction(e -> new VentanaPrestamo(bibliotecario).mostrar(ventana));
 
-        devoluciones.setOnAction(e -> mostrarMensaje("Devoluciones", "Pasando a pestaña Devoluciones"));
+        reservas.setOnAction(e -> new VentanaReserva(bibliotecario).mostrar(ventana));
 
-        reservas.setOnAction(e -> mostrarMensaje("Reservas", "Pasando a pestaña Reservas"));
+        devoluciones.setOnAction(e -> new VentanaDevoluciones(bibliotecario).mostrar(ventana));
 
-        consultas.setOnAction(e -> mostrarMensaje("Consultas", "Pasando a pestaña Consultas"));
+        consultas.setOnAction(e -> new VentanasConsultas(bibliotecario).Mostrar(ventana));
 
         volver.setOnAction(e -> ventana.close());
 
@@ -76,8 +76,8 @@ public class VentanaBibliotecario {
                 registrarUsuario,
                 registrarLibro,
                 prestamos,
-                devoluciones,
                 reservas,
+                devoluciones,
                 consultas,
                 volver
         );
