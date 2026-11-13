@@ -84,6 +84,10 @@ public class GestorBiblioteca {
         if (usuarioBuscado == null){
             throw new SinUsuarioException("Este usuario no existe.");
         }
+        //si el usuario fue dado de baja (baja logica), no puede pedir prestamos ni reservas.
+        if (!usuarioBuscado.isActivo()){
+            throw new SinUsuarioException("El usuario esta dado de baja.");
+        }
         //si el libro ya está prestado, avisa de su desponibilidad.
         if (libro.getEstaDispponible() == Disponibilidad.PRESTADO){
             throw new LibroNoDisponible("El libro ya esta prestado.");
@@ -95,7 +99,7 @@ public class GestorBiblioteca {
             for(Reserva reserva : reservas.values()){
                 //primero busca el libro
                 if (reserva.getLibro().equals(libro)){
-                //despues busca al usuario, si no es el mismo, tira la excepcion
+                    //despues busca al usuario, si no es el mismo, tira la excepcion
                     if(!reserva.getUsuario().getDni().equals(dni)){
                         throw new LibroNoDisponible("El libro esta reservado por otro usuario.");
                     }
@@ -132,6 +136,10 @@ public class GestorBiblioteca {
         }
         if (usuarioBuscado == null){
             throw new SinUsuarioException("Este usuario no existe.");
+        }
+        //si el usuario fue dado de baja (baja logica), no puede pedir prestamos ni reservas.
+        if (!usuarioBuscado.isActivo()){
+            throw new SinUsuarioException("El usuario esta dado de baja.");
         }
         //si el libro está disponible, no hace la reserva, ya que se puede hacer el prestamo,
         //y tira la excepcion
@@ -388,8 +396,9 @@ public class GestorBiblioteca {
                 throw new ErrorBuscandoUsuario("El usuario tiene uno o varios prestamos asignados.");
             }
         }
-        //si no tiene nada asociado, se elimina.
-        usuarios.remove(dni);
+        //si no tiene nada asociado, se da de baja (baja logica): no se borra del Map,
+        //se marca como inactivo para no perder sus datos ni su historial.
+        usuarios.get(dni).setActivo(false);
 
         return true;
     }
