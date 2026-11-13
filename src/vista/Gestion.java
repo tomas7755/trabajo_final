@@ -1,5 +1,5 @@
-package front;
-import front.ventanasBibliotecario.VentanaBibliotecario;
+package vista;
+import vista.bibliotecario.VentanaBibliotecario;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,7 +11,7 @@ import javafx.stage.Stage;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.Alert;
-import bibliotecario.Bibliotecario;
+import modelo.Bibliotecario;
 
 public class Gestion  extends Application{
 

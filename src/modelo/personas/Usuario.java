@@ -1,6 +1,4 @@
-package Usuario;
-
-import Personas.Persona;
+package modelo.personas;
 
 /**
  * Representa a un usuario de la biblioteca (la persona que pide libros prestados).

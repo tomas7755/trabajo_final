@@ -1,7 +1,7 @@
-package ClasesAuxiliares;
-import bibliotecario.Libro;
-import Usuario.Usuario;
-import Enum.Disponibilidad;
+package util;
+import modelo.Libro;
+import modelo.personas.Usuario;
+import enums.Disponibilidad;
 public class LibroAuxiliar {
     private Usuario usuario;
     private Libro libro;

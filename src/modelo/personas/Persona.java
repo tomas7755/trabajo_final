@@ -1,4 +1,4 @@
-package Personas;
+package modelo.personas;
 
 import java.util.Objects;
 

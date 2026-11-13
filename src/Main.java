@@ -1,4 +1,4 @@
-import front.Gestion;
+import vista.Gestion;
 import javafx.application.Application;
 
 public class Main {

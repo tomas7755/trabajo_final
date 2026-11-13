@@ -1,7 +1,5 @@
-package front.ventanasBibliotecario;
-
-import bibliotecario.Bibliotecario;
-import bibliotecario.Libro;
+package vista.bibliotecario;
+import modelo.Bibliotecario;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -10,11 +8,10 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-public class VentanaLibro {
-
+public class VentanaPrestamo {
     private Bibliotecario bibliotecario;
     //constructor
-    public VentanaLibro (Bibliotecario bibliotecario){
+    public VentanaPrestamo(Bibliotecario bibliotecario){
         this.bibliotecario = bibliotecario;
     }
     //metodo
@@ -22,27 +19,22 @@ public class VentanaLibro {
         Stage ventana = new Stage();
         ventana.initOwner(ventanaPrincipal);
 
-        Label titulo = new Label("Registrar libro");
+        //cajas para registrar y botones para registrar y volver
 
-        //cajas para rellenar y boton de registrar y volver.
+        Label titulo = new Label("Registrar Prestamo");
 
-        TextField identificador = new TextField();
-        identificador.setPromptText("Numero identificador");
+        TextField dni = new TextField();
+        dni.setPromptText("Dni del Usuario");
 
-        TextField nombre = new TextField();
-        nombre.setPromptText("Nombre del libro");
+        TextField numeroLibro = new TextField();
+        numeroLibro.setPromptText("Numero Identificador del libro");
 
-        TextField autor = new TextField();
-        autor.setPromptText("Nombre del autor");
-
-        Button registrar = new Button("Registrar");
+        Button registar = new Button("Registrar Prestamo");
         Button volver = new Button("Volver");
-
-        //estilo
 
         String estiloCampo = "-fx-background-radius: 8px;" + "-fx-font-size: 14px;" + "-fx-padding: 10px;";
 
-        TextField [] campos = {identificador, nombre, autor};
+        TextField [] campos = {dni, numeroLibro};
 
         for (TextField campo : campos){
             campo.setStyle(estiloCampo);
@@ -51,7 +43,7 @@ public class VentanaLibro {
 
         String estiloBoton = "-fx-background-color: #E6DDF2;" + "-fx-text-fill: #43245E;" + "-fx-font-size: 15px;" + "-fx-font-weight: bold;" + "-fx-background-radius: 10px;" + "-fx-cursor: hand;";
 
-        Button [] botones = {registrar, volver};
+        Button [] botones = {registar, volver};
 
         for (Button boton : botones){
             boton.setStyle(estiloBoton);
@@ -62,66 +54,48 @@ public class VentanaLibro {
 
         //acciones
 
-        registrar.setOnAction(e -> {
-
+        registar.setOnAction(e -> {
             try {
-
-                if (identificador.getText().isEmpty() ||
-                        nombre.getText().isEmpty() ||
-                        autor.getText().isEmpty()) {
+                if (dni.getText().isEmpty() ||
+                        numeroLibro.getText().isEmpty()) {
 
                     mostrarMensaje("Error", "Complete todos los campos.");
                     return;
                 }
-
-                int numero = Integer.parseInt(identificador.getText());
-
-                Libro libro = new Libro(
-                        numero,
-                        nombre.getText(),
-                        autor.getText()
+                int numero = Integer.parseInt(numeroLibro.getText());
+                boolean resultado = bibliotecario.agregarPrestamo(
+                        dni.getText(),
+                        numero
                 );
-
-                if (bibliotecario.agregarLibro(libro)) {
-
+                if (resultado) {
                     mostrarMensaje(
-                            "Registro exitoso",
-                            "El libro se registró correctamente."
+                            "Préstamo registrado",
+                            "El préstamo se registró correctamente."
                     );
-
-                    identificador.clear();
-                    nombre.clear();
-                    autor.clear();
-
-                } else {
-
-                    mostrarMensaje(
-                            "Error",
-                            "Ya existe un libro con ese identificador."
-                    );
+                    dni.clear();
+                    numeroLibro.clear();
                 }
-
             } catch (NumberFormatException ex) {
-
                 mostrarMensaje(
                         "Error",
-                        "El identificador debe ser un número entero."
+                        "El número del libro debe ser un número entero."
                 );
-
             } catch (Exception ex) {
-
-                mostrarMensaje("Error", ex.getMessage());
+                mostrarMensaje(
+                        "No se pudo registrar el préstamo",
+                        ex.getMessage()
+                );
             }
         });
-
         volver.setOnAction(e -> ventana.close());
 
         VBox contenido = new VBox(15);
         contenido.setAlignment(Pos.CENTER);
 
-        contenido.getChildren().addAll(titulo, identificador, nombre, autor, registrar, volver);
+        contenido.getChildren().addAll(titulo, dni, numeroLibro, registar, volver);
 
         //lineas de decoracion
+
         Region lineaSuperior = new Region();
         lineaSuperior.setPrefHeight(5);
         lineaSuperior.setStyle("-fx-background-color: #A56DE2;");
@@ -138,10 +112,9 @@ public class VentanaLibro {
 
         root.setStyle("-fx-background-color: #352044;");
 
-        //estilo
-        Scene escena = new Scene(root, 450, 500);
+        Scene escena = new Scene(root, 450, 450);
 
-        ventana.setTitle("Registrar libro");
+        ventana.setTitle("Registrar Prestamo");
         ventana.setScene(escena);
         ventana.setResizable(false);
         ventana.show();
@@ -153,5 +126,4 @@ public class VentanaLibro {
         alerta.setContentText(mensaje);
         alerta.showAndWait();
     }
-
 }

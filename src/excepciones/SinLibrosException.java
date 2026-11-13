@@ -1,4 +1,4 @@
-package Excepciones;
+package excepciones;
 
 public class SinLibrosException extends RuntimeException {
     public SinLibrosException(String message) {

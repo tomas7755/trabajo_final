@@ -1,4 +1,4 @@
-package Excepciones;
+package excepciones;
 
 public class ErrorBuscandoUsuario extends RuntimeException {
     public ErrorBuscandoUsuario(String message) {

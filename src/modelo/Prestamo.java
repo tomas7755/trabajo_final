@@ -1,5 +1,5 @@
-package bibliotecario;
-import Usuario.Usuario;
+package modelo;
+import modelo.personas.Usuario;
 import java.time.LocalDate;
 import java.util.Objects;
 

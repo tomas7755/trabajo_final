@@ -1,5 +1,5 @@
-package bibliotecario;
-import Enum.Disponibilidad;
+package modelo;
+import enums.Disponibilidad;
 
 import java.util.Objects;
 

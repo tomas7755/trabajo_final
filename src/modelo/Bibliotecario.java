@@ -1,8 +1,8 @@
-package bibliotecario;
-import ClasesAuxiliares.LibroAuxiliar;
-import Excepciones.*;
-import Usuario.Usuario;
-import Enum.Disponibilidad;
+package modelo;
+import util.LibroAuxiliar;
+import excepciones.*;
+import modelo.personas.Usuario;
+import enums.Disponibilidad;
 import java.util.*;
 public class Bibliotecario {
     private int contadorPrestamos = 0;

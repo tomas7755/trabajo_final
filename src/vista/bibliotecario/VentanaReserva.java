@@ -1,5 +1,5 @@
-package front.ventanasBibliotecario;
-import bibliotecario.Bibliotecario;
+package vista.bibliotecario;
+import modelo.Bibliotecario;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -7,10 +7,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-public class VentanaDevoluciones {
+public class VentanaReserva {
     private Bibliotecario bibliotecario;
     //constructor
-    public VentanaDevoluciones(Bibliotecario bibliotecario){
+    public VentanaReserva(Bibliotecario bibliotecario){
         this.bibliotecario = bibliotecario;
     }
     //metodo
@@ -18,19 +18,29 @@ public class VentanaDevoluciones {
         Stage ventana = new Stage();
         ventana.initOwner(ventanaPrincipal);
 
-        Label titulo = new Label("Registrar devoluciones");
+        Label titulo = new Label("Registrar Reserva");
 
-        TextField numeroPrestamo = new TextField();
-        numeroPrestamo.setPromptText("Numero identificador del prestamo");
+        //se crea las cajas para subir los datos y los botones de registrar y volver
 
-        Button registrar = new Button("Registrar devolucion");
+        TextField dni = new TextField();
+        dni.setPromptText("Dni del usuario");
+
+        TextField numeroLibro = new TextField();
+        numeroLibro.setPromptText("Numero identificador del libro");
+
+        Button registrar = new Button("Registrar reserva");
         Button volver = new Button("Volver");
 
-        numeroPrestamo.setStyle("-fx-background-radius: 8px;" + "-fx-font-size: 14px;" + "-fx-padding: 10px;");
+        String estiloCampo = "-fx-background-radius: 8px;" + "-fx-font-size: 14px;" + "-fx-padding: 10px;";
 
-        numeroPrestamo.setPrefWidth(300);
+        TextField [] campos = {dni, numeroLibro};
 
-        String estiloBoton =  "-fx-background-color: #E6DDF2;" + "-fx-text-fill: #43245E;" + "-fx-font-size: 15px;" + "-fx-font-weight: bold;" + "-fx-background-radius: 10px;" + "-fx-cursor: hand;";
+        for (TextField campo : campos){
+            campo.setStyle(estiloCampo);
+            campo.setPrefWidth(300);
+        }
+
+        String estiloBoton = "-fx-background-color: #E6DDF2;" + "-fx-text-fill: #43245E;" + "-fx-font-size: 15px;" + "-fx-font-weight: bold;" + "-fx-background-radius: 10px;" + "-fx-cursor: hand;";
 
         Button [] botones = {registrar, volver};
 
@@ -41,32 +51,40 @@ public class VentanaDevoluciones {
 
         titulo.setStyle("-fx-font-size: 26px;" + "-fx-font-weight: bold;" + "-fx-text-fill: white;");
 
+        //acciones
+
         registrar.setOnAction(e -> {
+
             try {
-                if (numeroPrestamo.getText().isEmpty()) {
-                    mostrarMensaje(
-                            "Error",
-                            "Ingrese el número del préstamo."
-                    );
+                if (dni.getText().isEmpty() ||
+                        numeroLibro.getText().isEmpty()) {
+
+                    mostrarMensaje("Error", "Complete todos los campos.");
                     return;
                 }
-                int numero = Integer.parseInt(numeroPrestamo.getText());
-                bibliotecario.eliminarPrestamo(numero);
-                mostrarMensaje(
-                        "Devolución registrada",
-                        "El libro se devolvió correctamente."
+                int numero = Integer.parseInt(numeroLibro.getText());
+                boolean resultado = bibliotecario.agregarReservas(
+                        dni.getText(),
+                        numero
                 );
-                numeroPrestamo.clear();
+                if (resultado) {
+                    mostrarMensaje(
+                            "Reserva registrada",
+                            "La reserva se registró correctamente."
+                    );
+                    dni.clear();
+                    numeroLibro.clear();
+                }
             }
             catch (NumberFormatException ex) {
                 mostrarMensaje(
                         "Error",
-                        "El número del préstamo debe ser un número entero."
+                        "El número del libro debe ser un número entero."
                 );
             }
             catch (Exception ex) {
                 mostrarMensaje(
-                        "No se pudo registrar la devolución",
+                        "No se pudo registrar la reserva",
                         ex.getMessage()
                 );
             }
@@ -76,12 +94,8 @@ public class VentanaDevoluciones {
         VBox contenido = new VBox(15);
         contenido.setAlignment(Pos.CENTER);
 
-        contenido.getChildren().addAll(
-                titulo,
-                numeroPrestamo,
-                registrar,
-                volver
-        );
+        contenido.getChildren().addAll(titulo, dni, numeroLibro, registrar, volver);
+
         Region lineaSuperior = new Region();
         lineaSuperior.setPrefHeight(5);
         lineaSuperior.setStyle("-fx-background-color: #A56DE2;");
@@ -98,9 +112,9 @@ public class VentanaDevoluciones {
 
         root.setStyle("-fx-background-color: #352044;");
 
-        Scene escena = new Scene(root, 450, 400);
+        Scene escena = new Scene(root, 450, 450);
 
-        ventana.setTitle("Registrar devolucion");
+        ventana.setTitle("Registrar Reserva");
         ventana.setScene(escena);
         ventana.setResizable(false);
         ventana.show();

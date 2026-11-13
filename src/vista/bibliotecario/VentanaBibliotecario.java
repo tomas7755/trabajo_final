@@ -1,7 +1,7 @@
 
-package front.ventanasBibliotecario;
+package vista.bibliotecario;
 
-import bibliotecario.Bibliotecario;
+import modelo.Bibliotecario;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;

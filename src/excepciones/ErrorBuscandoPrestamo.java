@@ -1,4 +1,4 @@
-package Excepciones;
+package excepciones;
 
 public class ErrorBuscandoPrestamo extends RuntimeException {
     public ErrorBuscandoPrestamo(String message) {

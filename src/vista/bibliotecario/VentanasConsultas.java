@@ -1,8 +1,8 @@
-package front.ventanasBibliotecario;
-import bibliotecario.Bibliotecario;
-import bibliotecario.Libro;
-import ClasesAuxiliares.LibroAuxiliar;
-import Usuario.Usuario;
+package vista.bibliotecario;
+import modelo.Bibliotecario;
+import modelo.Libro;
+import util.LibroAuxiliar;
+import modelo.personas.Usuario;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
