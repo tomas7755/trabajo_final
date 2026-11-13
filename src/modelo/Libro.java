@@ -8,6 +8,9 @@ public final class Libro{
     private String nombre;
     private String autor;
     private Disponibilidad estaDispponible;
+    //sirve para la baja logica: en vez de borrar el libro, se marca como inactivo.
+    //se inicializa aca para que todos los constructores lo creen activo.
+    private boolean activo = true;
     //constructor
     public Libro() {}
     public Libro(int numeroIdentificador, String nombre, String autor){
@@ -35,6 +38,9 @@ public final class Libro{
     public Disponibilidad getEstaDispponible(){
         return estaDispponible;
     }
+    public boolean isActivo() {
+        return activo;
+    }
     //setters:
     public void setNumeroIdentificador(int numeroIdentificador) {
         this.numeroIdentificador = numeroIdentificador;
@@ -47,6 +53,9 @@ public final class Libro{
     }
     public void setEstaDispponible(Disponibilidad estaDispponible) {
         this.estaDispponible = estaDispponible;
+    }
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
     //metodos:
     @Override
@@ -61,6 +70,6 @@ public final class Libro{
     }
     @Override
     public String toString() {
-        return "Libro{" + "numeroIdentificador=" + numeroIdentificador + ", nombre='" + nombre + '\'' + ", autor='" + autor + '\'' + ", estaDispponible=" + estaDispponible + '}';
+        return "Libro{" + "numeroIdentificador=" + numeroIdentificador + ", nombre='" + nombre + '\'' + ", autor='" + autor + '\'' + ", estaDispponible=" + estaDispponible + ", activo=" + activo + '}';
     }
 }
