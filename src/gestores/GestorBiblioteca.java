@@ -1,45 +1,34 @@
-package modelo;
+package gestores;
+import modelo.Libro;
+import modelo.Prestamo;
+import modelo.Reserva;
+import modelo.personas.Usuario;
 import util.LibroAuxiliar;
 import excepciones.*;
-import modelo.personas.Usuario;
 import enums.Disponibilidad;
 import java.util.*;
-public class Bibliotecario {
+
+/**
+ * Clase gestora del sistema: guarda en memoria los usuarios, libros, prestamos y reservas
+ * y contiene la logica para darlos de alta, buscarlos, listarlos, modificarlos y eliminarlos.
+ * No es una persona: los datos del bibliotecario estan en modelo.personas.Bibliotecario.
+ */
+public class GestorBiblioteca {
     private int contadorPrestamos = 0;
     private int contadorReserva = 0;
-    private String nombre;
-    private String legajo;
     private Map<String, Usuario> usuarios = new HashMap<>();
     private Map<Integer, Libro> libros = new HashMap<>();
     private Map<Integer, Prestamo> prestamos = new HashMap<>();
     private Map<Integer, Reserva> reservas = new HashMap<>();
     //constructores:
-    public Bibliotecario(){}
-    public Bibliotecario(String nombre, String legajo) {
-        this.nombre = nombre;
-        this.legajo = legajo;
-    }
-    public Bibliotecario(Map<String, Usuario> usuarios, Map<Integer, Libro> libros, Map<Integer, Prestamo> prestamos, Map<Integer, Reserva> reservas) {
-        this.usuarios = usuarios;
-        this.libros = libros;
-        this.prestamos = prestamos;
-        this.reservas = reservas;
-    }
-    public Bibliotecario(String nombre, String legajo, Map<String, Usuario> usuarios, Map<Integer, Libro> libros, Map<Integer, Prestamo> prestamos, Map<Integer, Reserva> reservas) {
-        this.nombre = nombre;
-        this.legajo = legajo;
+    public GestorBiblioteca(){}
+    public GestorBiblioteca(Map<String, Usuario> usuarios, Map<Integer, Libro> libros, Map<Integer, Prestamo> prestamos, Map<Integer, Reserva> reservas) {
         this.usuarios = usuarios;
         this.libros = libros;
         this.prestamos = prestamos;
         this.reservas = reservas;
     }
     //getters:
-    public String getNombre() {
-        return nombre;
-    }
-    public String getLegajo() {
-        return legajo;
-    }
     public Map<String, Usuario> getUsuarios() {
         return usuarios;
     }
@@ -53,12 +42,6 @@ public class Bibliotecario {
         return reservas;
     }
     //setters:
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-    public void setLegajo(String legajo) {
-        this.legajo = legajo;
-    }
     public void setUsuarios(Map<String, Usuario> usuarios) {
         this.usuarios = usuarios;
     }
@@ -71,6 +54,7 @@ public class Bibliotecario {
     public void setReservas(Map<Integer, Reserva> reservas) {
         this.reservas = reservas;
     }
+
     //metodos:
     //metodos para agregar cada uno de los objetos:
     public boolean agregarUsuario(Usuario agregado){

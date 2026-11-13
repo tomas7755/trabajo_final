@@ -11,11 +11,11 @@ import javafx.stage.Stage;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.Alert;
-import modelo.Bibliotecario;
+import gestores.GestorBiblioteca;
 
 public class Gestion  extends Application{
 
-    private Bibliotecario servicioBibliotecario = new Bibliotecario();
+    private GestorBiblioteca servicioBibliotecario = new GestorBiblioteca();
 
     //el metodo tiene que llamarse start porque extiende de application
     public void start(Stage stage){

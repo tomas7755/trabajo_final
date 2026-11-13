@@ -1,7 +1,7 @@
 
 package vista.bibliotecario;
 
-import modelo.Bibliotecario;
+import gestores.GestorBiblioteca;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -14,9 +14,9 @@ import javafx.stage.Stage;
 
 public class VentanaBibliotecario {
 
-    private Bibliotecario bibliotecario;
+    private GestorBiblioteca bibliotecario;
     // Constructor
-    public VentanaBibliotecario(Bibliotecario bibliotecario) {
+    public VentanaBibliotecario(GestorBiblioteca bibliotecario) {
         this.bibliotecario = bibliotecario;
     }
     // Metodo

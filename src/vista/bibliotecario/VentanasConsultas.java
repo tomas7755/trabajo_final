@@ -1,5 +1,5 @@
 package vista.bibliotecario;
-import modelo.Bibliotecario;
+import gestores.GestorBiblioteca;
 import modelo.Libro;
 import util.LibroAuxiliar;
 import modelo.personas.Usuario;
@@ -13,9 +13,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 public class VentanasConsultas {
-    private Bibliotecario bibliotecario;
+    private GestorBiblioteca bibliotecario;
     //connstructor
-    public VentanasConsultas (Bibliotecario bibliotecario){
+    public VentanasConsultas (GestorBiblioteca bibliotecario){
         this.bibliotecario = bibliotecario;
     }
     //metodo
