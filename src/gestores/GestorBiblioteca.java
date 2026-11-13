@@ -81,6 +81,10 @@ public class GestorBiblioteca {
         if (libro == null){
             throw new SinLibrosException("Este libro no existe.");
         }
+        //si el libro fue dado de baja (baja logica), no se puede prestar ni reservar.
+        if (!libro.isActivo()){
+            throw new SinLibrosException("El libro fue dado de baja.");
+        }
         if (usuarioBuscado == null){
             throw new SinUsuarioException("Este usuario no existe.");
         }
@@ -134,6 +138,10 @@ public class GestorBiblioteca {
         if (libro == null){
             throw new SinLibrosException("Este libro no existe.");
         }
+        //si el libro fue dado de baja (baja logica), no se puede prestar ni reservar.
+        if (!libro.isActivo()){
+            throw new SinLibrosException("El libro fue dado de baja.");
+        }
         if (usuarioBuscado == null){
             throw new SinUsuarioException("Este usuario no existe.");
         }
@@ -186,7 +194,8 @@ public class GestorBiblioteca {
     }
     public Libro buscarLibroPorNombre(String nombre){
         for (Libro buscado : libros.values()){
-            if(buscado.getNombre().equals(nombre)){
+            //solo se buscan los libros activos (los dados de baja no se muestran).
+            if(buscado.isActivo() && buscado.getNombre().equals(nombre)){
                 return buscado;
             }
         }
@@ -194,7 +203,8 @@ public class GestorBiblioteca {
     }
     public Libro buscarLibroPorAutor(String autor){
         for (Libro buscado : libros.values()){
-            if (buscado.getAutor().equalsIgnoreCase(autor)){
+            //solo se buscan los libros activos (los dados de baja no se muestran).
+            if (buscado.isActivo() && buscado.getAutor().equalsIgnoreCase(autor)){
                 return buscado;
             }
         }
@@ -299,7 +309,10 @@ public class GestorBiblioteca {
     public List<Libro> listarTodosLosLibros(){
         List <Libro> todos = new ArrayList<>();
         for (Libro libro : libros.values()){
-            todos.add(libro);
+            //solo se listan los libros activos (los dados de baja no se muestran).
+            if (libro.isActivo()){
+                todos.add(libro);
+            }
         }
         return todos;
     }
@@ -309,8 +322,8 @@ public class GestorBiblioteca {
         //se busca en los libros cuales son los disponibles.
         for (Libro libro : libros.values())
         {
-            //si el libro esta disponible, se guarda en el arraylist
-            if (libro.getEstaDispponible().equals(Disponibilidad.DISPONIBLE)){
+            //si el libro esta activo y disponible, se guarda en el arraylist
+            if (libro.isActivo() && libro.getEstaDispponible().equals(Disponibilidad.DISPONIBLE)){
                 buscados.add(libro);
             }
         }
@@ -412,8 +425,9 @@ public class GestorBiblioteca {
         if (!buscado.getEstaDispponible().equals(Disponibilidad.DISPONIBLE)){
             throw new ErrorBuscandoLibro("El libro se encuentra Reservado o en un Prestamo.");
         }
-        //si todo esta correcto, se elimina.
-        libros.remove(numeroIdentificador);
+        //si todo esta correcto, se da de baja (baja logica): no se borra del Map,
+        //se marca como inactivo para no perder sus datos ni su historial.
+        buscado.setActivo(false);
 
         return true;
     }
