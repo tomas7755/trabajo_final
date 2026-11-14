@@ -57,9 +57,9 @@ public class VentanaAdministrador {
         //acciones
         bibliotecarios.setOnAction(e -> new VentanaGestionBibliotecarios(gestorPersonas).mostrar(ventana));
 
-        //(provisionales hasta que esten las ventanas de cada opcion)
-        usuarios.setOnAction(e -> mostrarMensaje("Gestionar usuarios", "Esta sección todavía está en desarrollo."));
+        usuarios.setOnAction(e -> new VentanaGestionUsuarios(gestorBiblioteca).mostrar(ventana));
 
+        //(provisional hasta que este la ventana de listados)
         listados.setOnAction(e -> mostrarMensaje("Listados", "Esta sección todavía está en desarrollo."));
 
         volver.setOnAction(e -> ventana.close());
