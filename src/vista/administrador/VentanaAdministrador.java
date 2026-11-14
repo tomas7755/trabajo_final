@@ -54,9 +54,10 @@ public class VentanaAdministrador {
         //estilo del titulo
         titulo.setStyle("-fx-font-size: 28px;" + "-fx-font-weight: bold;" + "-fx-text-fill: white;");
 
-        //acciones (provisionales hasta que esten las ventanas de cada opcion)
-        bibliotecarios.setOnAction(e -> mostrarMensaje("Gestionar bibliotecarios", "Esta sección todavía está en desarrollo."));
+        //acciones
+        bibliotecarios.setOnAction(e -> new VentanaGestionBibliotecarios(gestorPersonas).mostrar(ventana));
 
+        //(provisionales hasta que esten las ventanas de cada opcion)
         usuarios.setOnAction(e -> mostrarMensaje("Gestionar usuarios", "Esta sección todavía está en desarrollo."));
 
         listados.setOnAction(e -> mostrarMensaje("Listados", "Esta sección todavía está en desarrollo."));
