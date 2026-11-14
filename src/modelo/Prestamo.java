@@ -3,7 +3,12 @@ import modelo.personas.Usuario;
 import java.time.LocalDate;
 import java.util.Objects;
 
+/**
+ * Representa el prestamo de un libro a un usuario.
+ * Guarda la fecha en que se presto y la fecha limite para devolverlo (15 dias despues).
+ */
 public final class Prestamo {
+    //numero que identifica al prestamo (es la clave en el Map del gestor).
     private int numeroPrestamo = 0;
     private Usuario usuario;
     private Libro libro;
@@ -51,15 +56,21 @@ public final class Prestamo {
         this.fechaDevolucion = fechaDevolucion;
     }
     //metodos:
+    //extiende la fecha de devolucion la cantidad de dias indicada (renovacion del prestamo).
+    public void renovar(int dias) {
+        this.fechaDevolucion = fechaDevolucion.plusDays(dias);
+    }
+    //dos prestamos son iguales si tienen el mismo numero de prestamo.
+    //(antes comparaba por usuario, y dos prestamos del mismo usuario quedaban "iguales").
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Prestamo prestamo = (Prestamo) o;
-        return Objects.equals(usuario, prestamo.usuario);
+        return numeroPrestamo == prestamo.numeroPrestamo;
     }
     @Override
     public int hashCode() {
-        return Objects.hashCode(usuario);
+        return Objects.hashCode(numeroPrestamo);
     }
     @Override
     public String toString() {

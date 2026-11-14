@@ -2,6 +2,11 @@ package util;
 import modelo.Libro;
 import modelo.personas.Usuario;
 import enums.Disponibilidad;
+
+/**
+ * Clase auxiliar que junta un usuario, un libro y el estado (prestado o reservado)
+ * para mostrar todo junto en las consultas del bibliotecario.
+ */
 public class LibroAuxiliar {
     private Usuario usuario;
     private Libro libro;

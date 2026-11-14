@@ -3,7 +3,12 @@ import modelo.personas.Usuario;
 
 import java.util.Objects;
 
+/**
+ * Representa la reserva de un libro que esta prestado.
+ * Cuando el libro se devuelve, queda guardado para el usuario que lo reservo.
+ */
 public final class Reserva {
+    //numero que identifica a la reserva (es la clave en el Map del gestor).
     private int numeroReserva = 0;
     private Usuario usuario;
     private Libro libro;
@@ -38,6 +43,7 @@ public final class Reserva {
         this.libro = libro;
     }
     //metodos:
+    //dos reservas son iguales si tienen el mismo numero de reserva.
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
