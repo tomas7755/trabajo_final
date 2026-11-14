@@ -140,7 +140,56 @@ public class VentanaGestionBibliotecarios {
             }
         });
 
-        //modificar, dar de baja y reactivar: todavia en desarrollo.
+        //MODIFICACION: reemplaza los datos del bibliotecario con ese DNI.
+        modificar.setOnAction(e -> {
+            if (hayCamposVacios(campos)) {
+                mostrarMensaje("Error", "Busque el bibliotecario y complete todos los campos.");
+                return;
+            }
+            try {
+                Bibliotecario modificado = new Bibliotecario(dni.getText(), nombre.getText(), apellido.getText(),
+                        email.getText(), contrasenia.getText(), legajo.getText());
+
+                gestorPersonas.modificarPersona(dni.getText(), modificado);
+
+                mostrarMensaje("Modificación exitosa", "Los datos se actualizaron correctamente.");
+
+            } catch (PersonaNoEncontradaException | PersonaDuplicadaException ex) {
+                mostrarMensaje("Error", ex.getMessage());
+            }
+        });
+
+        //BAJA LOGICA: marca al bibliotecario como inactivo (no se borra).
+        darDeBaja.setOnAction(e -> {
+            if (dni.getText().isEmpty()) {
+                mostrarMensaje("Error", "Ingrese el DNI del bibliotecario.");
+                return;
+            }
+            try {
+                gestorPersonas.darDeBaja(dni.getText());
+                estado.setText("Estado: Dado de baja");
+                mostrarMensaje("Baja exitosa", "El bibliotecario fue dado de baja.");
+
+            } catch (PersonaNoEncontradaException ex) {
+                mostrarMensaje("Error", ex.getMessage());
+            }
+        });
+
+        //vuelve a activar a un bibliotecario dado de baja.
+        reactivar.setOnAction(e -> {
+            if (dni.getText().isEmpty()) {
+                mostrarMensaje("Error", "Ingrese el DNI del bibliotecario.");
+                return;
+            }
+            try {
+                gestorPersonas.reactivar(dni.getText());
+                estado.setText("Estado: Activo");
+                mostrarMensaje("Reactivación exitosa", "El bibliotecario fue reactivado.");
+
+            } catch (PersonaNoEncontradaException ex) {
+                mostrarMensaje("Error", ex.getMessage());
+            }
+        });
 
         limpiar.setOnAction(e -> limpiarCampos(campos, estado));
 
