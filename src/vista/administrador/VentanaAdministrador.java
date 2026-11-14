@@ -4,7 +4,6 @@ import gestores.GestorBiblioteca;
 import gestores.GestorPersonas;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -59,8 +58,7 @@ public class VentanaAdministrador {
 
         usuarios.setOnAction(e -> new VentanaGestionUsuarios(gestorBiblioteca).mostrar(ventana));
 
-        //(provisional hasta que este la ventana de listados)
-        listados.setOnAction(e -> mostrarMensaje("Listados", "Esta sección todavía está en desarrollo."));
+        listados.setOnAction(e -> new VentanaListados(gestorPersonas, gestorBiblioteca).mostrar(ventana));
 
         volver.setOnAction(e -> ventana.close());
 
@@ -94,13 +92,5 @@ public class VentanaAdministrador {
         ventana.setScene(escena);
         ventana.setResizable(false);
         ventana.show();
-    }
-
-    private void mostrarMensaje(String titulo, String mensaje) {
-        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-        alerta.setTitle("Biblioteca");
-        alerta.setHeaderText(titulo);
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
     }
 }
