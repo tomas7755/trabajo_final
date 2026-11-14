@@ -24,7 +24,7 @@ import java.util.List;
 
 /**
  * Panel del usuario que ya inicio sesion.
- * Puede buscar libros por titulo o autor, ver sus prestamos y reservas, y reservar libros.
+ * Puede buscar libros por titulo, autor o genero, ver sus prestamos y reservas, y reservar libros.
  */
 public class VentanaUsuario {
 
@@ -49,7 +49,7 @@ public class VentanaUsuario {
 
         //busqueda: se elige por que buscar y se escribe el texto.
         ComboBox<String> buscarPor = new ComboBox<>();
-        buscarPor.getItems().addAll("Título", "Autor");
+        buscarPor.getItems().addAll("Título", "Autor", "Género");
         buscarPor.setValue("Título");
 
         TextField textoBusqueda = new TextField();
@@ -79,7 +79,7 @@ public class VentanaUsuario {
         volver.setPrefSize(300, 40);
 
         textoBusqueda.setStyle("-fx-background-radius: 8px;" + "-fx-font-size: 14px;" + "-fx-padding: 10px;");
-        textoBusqueda.setPrefWidth(340);
+        textoBusqueda.setPrefWidth(320);
         buscarPor.setStyle("-fx-font-size: 14px;");
         buscarPor.setPrefHeight(40);
 
@@ -87,22 +87,24 @@ public class VentanaUsuario {
 
         //acciones
 
-        //BUSCAR: trae los libros que coinciden con el titulo o el autor.
+        //BUSCAR: trae los libros que coinciden con el titulo, el autor o el genero.
         buscar.setOnAction(e -> {
             if (textoBusqueda.getText().isEmpty()) {
-                mostrarMensaje("Error", "Escriba un título o autor para buscar.");
+                mostrarMensaje("Error", "Escriba un título, autor o género para buscar.");
                 return;
             }
             if (buscarPor.getValue().equals("Título")) {
                 librosMostrados = gestorBiblioteca.buscarLibrosPorTitulo(textoBusqueda.getText());
-            } else {
+            } else if (buscarPor.getValue().equals("Autor")) {
                 librosMostrados = gestorBiblioteca.buscarLibrosPorAutor(textoBusqueda.getText());
+            } else {
+                librosMostrados = gestorBiblioteca.buscarLibrosPorGenero(textoBusqueda.getText());
             }
 
             ObservableList<String> lista = FXCollections.observableArrayList();
             for (Libro libro : librosMostrados) {
                 lista.add("ID: " + libro.getNumeroIdentificador() + " | " + libro.getNombre()
-                        + " | Autor: " + libro.getAutor() + " | Estado: " + libro.getEstaDispponible());
+                        + " | Autor: " + libro.getAutor() + " | Género: " + libro.getGenero() + " | Estado: " + libro.getEstaDispponible());
             }
             if (lista.isEmpty()) {
                 lista.add("No se encontraron libros.");
