@@ -334,7 +334,25 @@ public class GestorBiblioteca {
         }
         return encontrados;
     }
+    //busca todos los libros activos cuyo genero contenga el texto (sin importar mayusculas).
+    public List<Libro> buscarLibrosPorGenero(String texto){
+        List<Libro> encontrados = new ArrayList<>();
+        for (Libro libro : libros.values()){
+            if (libro.isActivo() && libro.getGenero().toLowerCase().contains(texto.toLowerCase())){
+                encontrados.add(libro);
+            }
+        }
+        return encontrados;
+    }
     //metodos para listar:
+    //devuelve todos los prestamos activos (para que el bibliotecario los vea).
+    public List<Prestamo> listarPrestamos(){
+        return new ArrayList<>(prestamos.values());
+    }
+    //devuelve todas las reservas.
+    public List<Reserva> listarReservas(){
+        return new ArrayList<>(reservas.values());
+    }
     //devuelve los prestamos de un usuario (con sus fechas).
     public List<Prestamo> listarPrestamosDeUsuario(String dni){
         List<Prestamo> encontrados = new ArrayList<>();
@@ -405,10 +423,15 @@ public class GestorBiblioteca {
         if(nuevo == null || !nuevo.getDni().equals(dni)){
             throw new ErrorBuscandoUsuario("Los datos del usuario son invalidos.");
         }
-        //se mantiene el estado (activo/dado de baja) que tenia el usuario.
-        nuevo.setActivo(usuarios.get(dni).isActivo());
-        //si todo esta correcto, lo sobreescribe..
-        usuarios.put(dni, nuevo);
+        //se actualizan los datos del mismo objeto (no se reemplaza), porque los prestamos
+        //y reservas apuntan a ese objeto. Asi tambien se mantiene su estado (activo/dado de baja).
+        Usuario viejo = usuarios.get(dni);
+        viejo.setNombre(nuevo.getNombre());
+        viejo.setApellido(nuevo.getApellido());
+        viejo.setEmail(nuevo.getEmail());
+        viejo.setContrasenia(nuevo.getContrasenia());
+        viejo.setDireccion(nuevo.getDireccion());
+        viejo.setTelefono(nuevo.getTelefono());
         return true;
     }
     public boolean modificarLibro(int numeroIdentificador, Libro nuevo) throws ErrorBuscandoLibro {
@@ -421,8 +444,12 @@ public class GestorBiblioteca {
         if (nuevo == null || nuevo.getNumeroIdentificador() != numeroIdentificador){
             throw new ErrorBuscandoLibro("Los datos del libro son erroneos.");
         }
-        //si todo esta correcto, lo sobreescribe..
-        libros.put(numeroIdentificador, nuevo);
+        //se actualizan los datos del mismo objeto (no se reemplaza), porque los prestamos
+        //y reservas apuntan a ese objeto. Asi tambien se mantiene su estado y si esta activo.
+        Libro viejo = libros.get(numeroIdentificador);
+        viejo.setNombre(nuevo.getNombre());
+        viejo.setAutor(nuevo.getAutor());
+        viejo.setGenero(nuevo.getGenero());
 
         return true;
     }
@@ -506,6 +533,47 @@ public class GestorBiblioteca {
         buscado.setActivo(false);
 
         return true;
+    }
+    //vuelve a activar un libro que habia sido dado de baja.
+    public boolean reactivarLibro(int numeroIdentificador) throws ErrorBuscandoLibro{
+        if (!libros.containsKey(numeroIdentificador)){
+            throw new ErrorBuscandoLibro("El libro que quiere reactivar no existe.");
+        }
+        libros.get(numeroIdentificador).setActivo(true);
+        return true;
+    }
+    //DEVOLUCION por numero de libro: busca el prestamo de ese libro y lo elimina.
+    //(es mas facil para el bibliotecario, que tiene el libro en la mano).
+    public boolean devolverLibro(int numeroIdentificador) throws ErrorBuscandoPrestamo{
+        Libro libro = libros.get(numeroIdentificador);
+        Prestamo prestamo = (libro == null) ? null : buscarPrestamoDeLibro(libro);
+        if (prestamo == null){
+            throw new ErrorBuscandoPrestamo("Ese libro no esta prestado.");
+        }
+        return eliminarPrestamo(prestamo.getNumeroPrestamo());
+    }
+    //RENOVACION (modificacion del prestamo): extiende 15 dias la fecha de devolucion.
+    //no se puede renovar si otro usuario esta esperando el libro.
+    public boolean renovarPrestamo(int numeroIdentificador) throws ErrorBuscandoPrestamo, LibroNoDisponible{
+        Libro libro = libros.get(numeroIdentificador);
+        Prestamo prestamo = (libro == null) ? null : buscarPrestamoDeLibro(libro);
+        if (prestamo == null){
+            throw new ErrorBuscandoPrestamo("Ese libro no esta prestado.");
+        }
+        if (buscarReservaDeLibro(libro) != null){
+            throw new LibroNoDisponible("No se puede renovar: otro usuario reservo el libro.");
+        }
+        prestamo.renovar(15);
+        return true;
+    }
+    //cancela la reserva de un libro (buscandola por el numero del libro).
+    public boolean cancelarReservaDeLibro(int numeroIdentificador) throws ErrorBuscandoReserva{
+        Libro libro = libros.get(numeroIdentificador);
+        Reserva reserva = (libro == null) ? null : buscarReservaDeLibro(libro);
+        if (reserva == null){
+            throw new ErrorBuscandoReserva("Ese libro no tiene ninguna reserva.");
+        }
+        return eliminarReserva(reserva.getNumeroReserva());
     }
     public boolean eliminarReserva(int numeroReserva)throws ErrorBuscandoReserva{
         //primero busca que exista la reserva, si no, tira la excepcion.
