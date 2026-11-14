@@ -154,12 +154,17 @@ public class GestorBiblioteca {
         if (libro.getEstaDispponible() == Disponibilidad.DISPONIBLE){
             throw new LibroNoDisponible("El libro esta disponible, puede pedir el prestamo.");
         }
-        //si el libro ya está reservado, no permite reservarlo a otra persona.
-        if (libro.getEstaDispponible() == Disponibilidad.RESERVADO){
+        //si el libro ya tiene una reserva (de cualquier usuario), no permite otra.
+        if (buscarReservaDeLibro(libro) != null){
             throw new LibroNoDisponible("El libro ya esta reservado, no se puede reservar.");
         }
-        //cambia el estado a reservado
-        libro.setEstaDispponible(Disponibilidad.RESERVADO);
+        //si el libro esta prestado al mismo usuario que quiere reservarlo, no tiene sentido reservarlo.
+        Prestamo prestamoActual = buscarPrestamoDeLibro(libro);
+        if (prestamoActual != null && prestamoActual.getUsuario().getDni().equals(dni)){
+            throw new LibroNoDisponible("Ya tenes este libro prestado, no lo podes reservar.");
+        }
+        //el libro sigue PRESTADO mientras no se devuelva (la reserva queda guardada aparte).
+        //cuando se devuelva, eliminarPrestamo lo pasa a RESERVADO.
         //se asigna el numero de reserva
         contadorReserva++;
 
@@ -287,6 +292,24 @@ public class GestorBiblioteca {
         for (Reserva buscado : reservas.values()){
             if (buscado.getNumeroReserva() == numeroIdentificador){
                 return buscado;
+            }
+        }
+        return null;
+    }
+    //devuelve la reserva que tiene un libro, o null si nadie lo reservo.
+    public Reserva buscarReservaDeLibro(Libro libro){
+        for (Reserva reserva : reservas.values()){
+            if (reserva.getLibro().equals(libro)){
+                return reserva;
+            }
+        }
+        return null;
+    }
+    //devuelve el prestamo que tiene un libro, o null si no esta prestado.
+    public Prestamo buscarPrestamoDeLibro(Libro libro){
+        for (Prestamo prestamo : prestamos.values()){
+            if (prestamo.getLibro().equals(libro)){
+                return prestamo;
             }
         }
         return null;
@@ -493,8 +516,11 @@ public class GestorBiblioteca {
         Libro libro = reservas.get(numeroReserva).getLibro();
         //si se encuentra, se elimina.
         reservas.remove(numeroReserva);
-        //se cambia la disponibilidad del libro a "disponible".
-        libro.setEstaDispponible(Disponibilidad.DISPONIBLE);
+        //si el libro estaba esperando al que lo reservo, vuelve a estar disponible.
+        //si todavia esta prestado, sigue prestado.
+        if (libro.getEstaDispponible() == Disponibilidad.RESERVADO){
+            libro.setEstaDispponible(Disponibilidad.DISPONIBLE);
+        }
 
         return true;
     }
@@ -507,8 +533,13 @@ public class GestorBiblioteca {
         Libro libro = prestamos.get(numeroPrestamo).getLibro();
         //se elimina el prestamo.
         prestamos.remove(numeroPrestamo);
-        //se modifica la disponibilidad del libro a "disponible".
-        libro.setEstaDispponible(Disponibilidad.DISPONIBLE);
+        //si alguien lo tenia reservado, el libro queda RESERVADO para esa persona.
+        //si no, vuelve a estar disponible.
+        if (buscarReservaDeLibro(libro) != null){
+            libro.setEstaDispponible(Disponibilidad.RESERVADO);
+        } else {
+            libro.setEstaDispponible(Disponibilidad.DISPONIBLE);
+        }
         return true;
     }
 }
