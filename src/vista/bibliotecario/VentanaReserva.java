@@ -7,6 +7,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+
+/**
+ * Ventana donde el bibliotecario registra la reserva de un libro prestado
+ * o cancela la reserva de un libro (baja de la reserva).
+ */
 public class VentanaReserva {
     private GestorBiblioteca bibliotecario;
     //constructor
@@ -18,7 +23,7 @@ public class VentanaReserva {
         Stage ventana = new Stage();
         ventana.initOwner(ventanaPrincipal);
 
-        Label titulo = new Label("Registrar Reserva");
+        Label titulo = new Label("Reservas");
 
         //se crea las cajas para subir los datos y los botones de registrar y volver
 
@@ -29,6 +34,7 @@ public class VentanaReserva {
         numeroLibro.setPromptText("Numero identificador del libro");
 
         Button registrar = new Button("Registrar reserva");
+        Button cancelar = new Button("Cancelar reserva del libro");
         Button volver = new Button("Volver");
 
         String estiloCampo = "-fx-background-radius: 8px;" + "-fx-font-size: 14px;" + "-fx-padding: 10px;";
@@ -42,7 +48,7 @@ public class VentanaReserva {
 
         String estiloBoton = "-fx-background-color: #E6DDF2;" + "-fx-text-fill: #43245E;" + "-fx-font-size: 15px;" + "-fx-font-weight: bold;" + "-fx-background-radius: 10px;" + "-fx-cursor: hand;";
 
-        Button [] botones = {registrar, volver};
+        Button [] botones = {registrar, cancelar, volver};
 
         for (Button boton : botones){
             boton.setStyle(estiloBoton);
@@ -89,12 +95,28 @@ public class VentanaReserva {
                 );
             }
         });
+        //CANCELAR (baja de la reserva): solo hace falta el numero del libro.
+        cancelar.setOnAction(e -> {
+            try {
+                int numero = Integer.parseInt(numeroLibro.getText());
+                bibliotecario.cancelarReservaDeLibro(numero);
+                mostrarMensaje("Reserva cancelada", "La reserva del libro fue cancelada.");
+                dni.clear();
+                numeroLibro.clear();
+            }
+            catch (NumberFormatException ex) {
+                mostrarMensaje("Error", "Ingrese el número del libro.");
+            }
+            catch (Exception ex) {
+                mostrarMensaje("No se pudo cancelar", ex.getMessage());
+            }
+        });
         volver.setOnAction(e -> ventana.close());
 
         VBox contenido = new VBox(15);
         contenido.setAlignment(Pos.CENTER);
 
-        contenido.getChildren().addAll(titulo, dni, numeroLibro, registrar, volver);
+        contenido.getChildren().addAll(titulo, dni, numeroLibro, registrar, cancelar, volver);
 
         Region lineaSuperior = new Region();
         lineaSuperior.setPrefHeight(5);
@@ -112,9 +134,9 @@ public class VentanaReserva {
 
         root.setStyle("-fx-background-color: #352044;");
 
-        Scene escena = new Scene(root, 450, 450);
+        Scene escena = new Scene(root, 450, 480);
 
-        ventana.setTitle("Registrar Reserva");
+        ventana.setTitle("Reservas");
         ventana.setScene(escena);
         ventana.setResizable(false);
         ventana.show();

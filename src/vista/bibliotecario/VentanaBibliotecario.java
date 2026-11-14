@@ -4,14 +4,17 @@ package vista.bibliotecario;
 import gestores.GestorBiblioteca;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
+import vista.administrador.VentanaGestionUsuarios;
 
+/**
+ * Menu principal del bibliotecario: usuarios, libros, prestamos, reservas, devoluciones y consultas.
+ */
 public class VentanaBibliotecario {
 
     private GestorBiblioteca bibliotecario;
@@ -27,11 +30,11 @@ public class VentanaBibliotecario {
 
         Label titulo = new Label("Panel Bibliotecario");
 
-        Button registrarUsuario = new Button("Registrar usuario");
-        Button registrarLibro = new Button("Registrar libro");
+        Button registrarUsuario = new Button("Gestionar usuarios");
+        Button registrarLibro = new Button("Gestionar libros");
         Button prestamos = new Button("Registrar préstamos");
-        Button devoluciones = new Button("Registrar devolución");
-        Button reservas = new Button("Registrar reserva");
+        Button devoluciones = new Button("Devoluciones y renovaciones");
+        Button reservas = new Button("Reservas");
         Button consultas = new Button("Consultar libros y usuarios");
         Button volver = new Button("Volver");
 
@@ -53,7 +56,8 @@ public class VentanaBibliotecario {
         titulo.setStyle("-fx-font-size: 28px;" + "-fx-font-weight: bold;" + "-fx-text-fill: white;");
 
         // Acciones
-        registrarUsuario.setOnAction(e -> mostrarMensaje("Registrar usuario", "Pasando a registro de usuarios"));
+        //reutiliza la misma ventana de usuarios que usa el administrador.
+        registrarUsuario.setOnAction(e -> new VentanaGestionUsuarios(bibliotecario).mostrar(ventana));
 
         registrarLibro.setOnAction(e -> new VentanaLibro(bibliotecario).mostrar(ventana));
 
@@ -108,11 +112,4 @@ public class VentanaBibliotecario {
         ventana.show();
     }
 
-    private void mostrarMensaje(String titulo, String mensaje) {
-        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-        alerta.setTitle("Biblioteca");
-        alerta.setHeaderText(titulo);
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
-    }
 }
