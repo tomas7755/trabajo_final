@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 import modelo.personas.Administrador;
 import modelo.personas.Bibliotecario;
 import modelo.personas.Persona;
+import modelo.personas.Usuario;
 
 /**
  * Ventana de listados del administrador: muestra el personal (bibliotecarios y administradores)
@@ -40,8 +41,8 @@ public class VentanaListados {
         //opciones de listado
         ComboBox<String> opciones = new ComboBox<>();
 
-        //(los listados de usuarios todavia estan en desarrollo)
-        opciones.getItems().addAll("Todo el personal", "Personal activo", "Bibliotecarios", "Administradores");
+        opciones.getItems().addAll("Todo el personal", "Personal activo", "Bibliotecarios", "Administradores",
+                "Todos los usuarios", "Usuarios activos", "Usuarios dados de baja");
 
         opciones.setPromptText("Seleccione un listado");
 
@@ -87,6 +88,25 @@ public class VentanaListados {
                 case "Administradores":
                     for (Administrador administrador : gestorPersonas.listarAdministradores()) {
                         lista.add(formatoPersonal(administrador));
+                    }
+                    break;
+                case "Todos los usuarios":
+                    for (Usuario usuario : gestorBiblioteca.getUsuarios().values()) {
+                        lista.add(formatoUsuario(usuario));
+                    }
+                    break;
+                case "Usuarios activos":
+                    for (Usuario usuario : gestorBiblioteca.getUsuarios().values()) {
+                        if (usuario.isActivo()) {
+                            lista.add(formatoUsuario(usuario));
+                        }
+                    }
+                    break;
+                case "Usuarios dados de baja":
+                    for (Usuario usuario : gestorBiblioteca.getUsuarios().values()) {
+                        if (!usuario.isActivo()) {
+                            lista.add(formatoUsuario(usuario));
+                        }
                     }
                     break;
             }
@@ -139,6 +159,12 @@ public class VentanaListados {
             texto += " | Legajo: " + ((Bibliotecario) persona).getLegajo();
         }
         return texto + " | " + estado(persona);
+    }
+
+    //arma el texto de un usuario.
+    private String formatoUsuario(Usuario usuario) {
+        return "DNI: " + usuario.getDni() + " | " + usuario.getNombre() + " " + usuario.getApellido()
+                + " | Tel: " + usuario.getTelefono() + " | " + estado(usuario);
     }
 
     private String estado(Persona persona) {
