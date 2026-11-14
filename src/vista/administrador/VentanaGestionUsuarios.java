@@ -1,5 +1,6 @@
 package vista.administrador;
 
+import excepciones.ErrorBuscandoUsuario;
 import gestores.GestorBiblioteca;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -133,7 +134,57 @@ public class VentanaGestionUsuarios {
             estado.setText("Estado: " + (usuario.isActivo() ? "Activo" : "Dado de baja"));
         });
 
-        //modificar, dar de baja y reactivar: todavia en desarrollo.
+        //MODIFICACION: reemplaza los datos del usuario con ese DNI.
+        modificar.setOnAction(e -> {
+            if (hayCamposVacios(campos)) {
+                mostrarMensaje("Error", "Busque el usuario y complete todos los campos.");
+                return;
+            }
+            try {
+                Usuario modificado = new Usuario(dni.getText(), nombre.getText(), apellido.getText(), email.getText(),
+                        contrasenia.getText(), direccion.getText(), telefono.getText());
+
+                gestorBiblioteca.modificarDatosUsuario(dni.getText(), modificado);
+
+                mostrarMensaje("Modificación exitosa", "Los datos se actualizaron correctamente.");
+
+            } catch (ErrorBuscandoUsuario ex) {
+                mostrarMensaje("Error", ex.getMessage());
+            }
+        });
+
+        //BAJA LOGICA: marca al usuario como inactivo (no se borra).
+        //el gestor no deja darlo de baja si tiene prestamos o reservas.
+        darDeBaja.setOnAction(e -> {
+            if (dni.getText().isEmpty()) {
+                mostrarMensaje("Error", "Ingrese el DNI del usuario.");
+                return;
+            }
+            try {
+                gestorBiblioteca.eliminarUsuario(dni.getText());
+                estado.setText("Estado: Dado de baja");
+                mostrarMensaje("Baja exitosa", "El usuario fue dado de baja.");
+
+            } catch (ErrorBuscandoUsuario ex) {
+                mostrarMensaje("Error", ex.getMessage());
+            }
+        });
+
+        //vuelve a activar a un usuario dado de baja.
+        reactivar.setOnAction(e -> {
+            if (dni.getText().isEmpty()) {
+                mostrarMensaje("Error", "Ingrese el DNI del usuario.");
+                return;
+            }
+            try {
+                gestorBiblioteca.reactivarUsuario(dni.getText());
+                estado.setText("Estado: Activo");
+                mostrarMensaje("Reactivación exitosa", "El usuario fue reactivado.");
+
+            } catch (ErrorBuscandoUsuario ex) {
+                mostrarMensaje("Error", ex.getMessage());
+            }
+        });
 
         limpiar.setOnAction(e -> limpiarCampos(campos, estado));
 
