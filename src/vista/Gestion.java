@@ -1,6 +1,7 @@
 package vista;
 import vista.bibliotecario.VentanaBibliotecario;
 import vista.administrador.VentanaAdministrador;
+import vista.usuario.VentanaIngresoUsuario;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,7 +12,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.control.Alert;
 import gestores.GestorBiblioteca;
 import gestores.GestorPersonas;
 
@@ -52,10 +52,10 @@ public class Gestion  extends Application{
         bibliotecario.setPrefSize(280, 50);
         usuario.setPrefSize(280, 50);
 
-        //acciones provisionales
+        //acciones
         administrador.setOnAction(e -> new VentanaAdministrador(gestorPersonas, servicioBibliotecario).mostrar(stage));
         bibliotecario.setOnAction(e -> new VentanaBibliotecario(servicioBibliotecario).mostrar(stage));
-        usuario.setOnAction(e -> mostrarMensaje("usuario"));
+        usuario.setOnAction(e -> new VentanaIngresoUsuario(servicioBibliotecario).mostrar(stage));
 
         //organizar los elementos
         VBox menu = new VBox(25);
@@ -74,15 +74,4 @@ public class Gestion  extends Application{
         stage.setResizable(false);
         stage.show();
     }
-
-    // Mensaje provisional
-    public void mostrarMensaje(String rol) {
-        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-        alerta.setTitle("Biblioteca");
-        alerta.setHeaderText(rol);
-        alerta.setContentText("Esta sección todavía está en desarrollo.");
-        alerta.showAndWait();
-    }
-
-
 }

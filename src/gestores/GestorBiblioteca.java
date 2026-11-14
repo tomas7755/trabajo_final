@@ -291,7 +291,48 @@ public class GestorBiblioteca {
         }
         return null;
     }
+    //busca todos los libros activos cuyo titulo contenga el texto (sin importar mayusculas).
+    public List<Libro> buscarLibrosPorTitulo(String texto){
+        List<Libro> encontrados = new ArrayList<>();
+        for (Libro libro : libros.values()){
+            if (libro.isActivo() && libro.getNombre().toLowerCase().contains(texto.toLowerCase())){
+                encontrados.add(libro);
+            }
+        }
+        return encontrados;
+    }
+    //busca todos los libros activos cuyo autor contenga el texto (sin importar mayusculas).
+    public List<Libro> buscarLibrosPorAutor(String texto){
+        List<Libro> encontrados = new ArrayList<>();
+        for (Libro libro : libros.values()){
+            if (libro.isActivo() && libro.getAutor().toLowerCase().contains(texto.toLowerCase())){
+                encontrados.add(libro);
+            }
+        }
+        return encontrados;
+    }
     //metodos para listar:
+    //devuelve los prestamos de un usuario (con sus fechas).
+    public List<Prestamo> listarPrestamosDeUsuario(String dni){
+        List<Prestamo> encontrados = new ArrayList<>();
+        for (Prestamo prestamo : prestamos.values()){
+            if (prestamo.getUsuario().getDni().equals(dni)){
+                encontrados.add(prestamo);
+            }
+        }
+        return encontrados;
+    }
+    //devuelve las reservas de un usuario.
+    public List<Reserva> listarReservasDeUsuario(String dni){
+        List<Reserva> encontradas = new ArrayList<>();
+        for (Reserva reserva : reservas.values()){
+            if (reserva.getUsuario().getDni().equals(dni)){
+                encontradas.add(reserva);
+            }
+        }
+        return encontradas;
+    }
+
     public List<LibroAuxiliar> listarUsuarioconLibros(){
         //hacemos un arraylist de una clase auxiliar para guardar todos los datos(usuarios, libros y disponibilidad)
         //en el mismo lugar (para ayudar al front)

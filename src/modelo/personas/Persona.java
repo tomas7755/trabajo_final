@@ -1,14 +1,17 @@
 package modelo.personas;
 
+import interfaces.Autenticable;
+
 import java.util.Objects;
 
 /**
  * Clase abstracta que reune los datos comunes a todas las personas del sistema
  * (usuarios, administradores, bibliotecarios).
  * Es abstracta porque nunca se crea una "Persona" sola: siempre es de algun tipo concreto.
+ * Implementa Autenticable porque todas las personas pueden iniciar sesion con su contraseña.
  */
 
-public abstract class Persona {
+public abstract class Persona implements Autenticable {
     private String dni;
     private String nombre;
     private String apellido;
@@ -74,6 +77,13 @@ public abstract class Persona {
     //metodos:
     //metodo abstracto: cada clase hija dice que tipo de persona es (polimorfismo).
     public abstract String getTipo();
+
+    //metodo de la interfaz Autenticable: la contraseña tiene que coincidir
+    //y la persona tiene que estar activa (si fue dada de baja, no puede entrar).
+    @Override
+    public boolean autenticar(String contrasenia) {
+        return activo && this.contrasenia != null && this.contrasenia.equals(contrasenia);
+    }
 
     //dos personas son iguales si tienen el mismo dni.
     @Override
