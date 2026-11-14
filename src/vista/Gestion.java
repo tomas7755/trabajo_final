@@ -1,5 +1,6 @@
 package vista;
 import vista.bibliotecario.VentanaBibliotecario;
+import vista.administrador.VentanaAdministrador;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -12,10 +13,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.Alert;
 import gestores.GestorBiblioteca;
+import gestores.GestorPersonas;
 
 public class Gestion  extends Application{
 
     private GestorBiblioteca servicioBibliotecario = new GestorBiblioteca();
+    //gestor del personal, lo usa el administrador.
+    private GestorPersonas gestorPersonas = new GestorPersonas();
 
     //el metodo tiene que llamarse start porque extiende de application
     public void start(Stage stage){
@@ -49,7 +53,7 @@ public class Gestion  extends Application{
         usuario.setPrefSize(280, 50);
 
         //acciones provisionales
-        administrador.setOnAction(e -> mostrarMensaje("administrador"));
+        administrador.setOnAction(e -> new VentanaAdministrador(gestorPersonas, servicioBibliotecario).mostrar(stage));
         bibliotecario.setOnAction(e -> new VentanaBibliotecario(servicioBibliotecario).mostrar(stage));
         usuario.setOnAction(e -> mostrarMensaje("usuario"));
 
