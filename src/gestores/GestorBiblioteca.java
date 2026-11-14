@@ -341,6 +341,8 @@ public class GestorBiblioteca {
         if(nuevo == null || !nuevo.getDni().equals(dni)){
             throw new ErrorBuscandoUsuario("Los datos del usuario son invalidos.");
         }
+        //se mantiene el estado (activo/dado de baja) que tenia el usuario.
+        nuevo.setActivo(usuarios.get(dni).isActivo());
         //si todo esta correcto, lo sobreescribe..
         usuarios.put(dni, nuevo);
         return true;
@@ -412,6 +414,16 @@ public class GestorBiblioteca {
         //si no tiene nada asociado, se da de baja (baja logica): no se borra del Map,
         //se marca como inactivo para no perder sus datos ni su historial.
         usuarios.get(dni).setActivo(false);
+
+        return true;
+    }
+    //vuelve a activar a un usuario que habia sido dado de baja.
+    public boolean reactivarUsuario(String dni) throws ErrorBuscandoUsuario{
+        //comprueba que el usuario exista, si no existe tira la excepcion.
+        if (!usuarios.containsKey(dni)){
+            throw new ErrorBuscandoUsuario("El usuario que quiere reactivar no existe.");
+        }
+        usuarios.get(dni).setActivo(true);
 
         return true;
     }
