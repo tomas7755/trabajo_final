@@ -1,6 +1,4 @@
 package vista;
-import vista.bibliotecario.VentanaBibliotecario;
-import vista.administrador.VentanaAdministrador;
 import vista.usuario.VentanaIngresoUsuario;
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -14,7 +12,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import gestores.GestorBiblioteca;
 import gestores.GestorPersonas;
+import modelo.personas.Administrador;
 
+/**
+ * Ventana principal del sistema: el usuario elige con que rol quiere ingresar.
+ */
 public class Gestion  extends Application{
 
     private GestorBiblioteca servicioBibliotecario = new GestorBiblioteca();
@@ -23,8 +25,13 @@ public class Gestion  extends Application{
 
     //el metodo tiene que llamarse start porque extiende de application
     public void start(Stage stage){
-        // se carga la imagen de fondo
-        Image imagen = new Image(getClass().getResourceAsStream("/imagenes/fondo.png"));
+        //administrador inicial, para poder entrar al sistema la primera vez
+        //(despues se va a cargar desde la base de datos).
+        gestorPersonas.agregarPersona(new Administrador("11111111", "Admin", "Sistema", "admin@biblioteca.com", "admin123"));
+
+        // se carga la imagen de fondo (el nombre del archivo es Fondo.png, con mayuscula:
+        // en Windows da igual, pero en Mac/Linux si no coincide el programa no abre)
+        Image imagen = new Image(getClass().getResourceAsStream("/imagenes/Fondo.png"));
 
         // se crea la imageView
         ImageView fondo = new ImageView(imagen);
@@ -53,8 +60,9 @@ public class Gestion  extends Application{
         usuario.setPrefSize(280, 50);
 
         //acciones
-        administrador.setOnAction(e -> new VentanaAdministrador(gestorPersonas, servicioBibliotecario).mostrar(stage));
-        bibliotecario.setOnAction(e -> new VentanaBibliotecario(servicioBibliotecario).mostrar(stage));
+        //el administrador y el bibliotecario tienen que iniciar sesion antes de entrar a su panel.
+        administrador.setOnAction(e -> new VentanaIngresoPersonal(gestorPersonas, servicioBibliotecario, true).mostrar(stage));
+        bibliotecario.setOnAction(e -> new VentanaIngresoPersonal(gestorPersonas, servicioBibliotecario, false).mostrar(stage));
         usuario.setOnAction(e -> new VentanaIngresoUsuario(servicioBibliotecario).mostrar(stage));
 
         //organizar los elementos
