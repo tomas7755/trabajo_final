@@ -12,22 +12,43 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import gestores.GestorBiblioteca;
 import gestores.GestorPersonas;
-import modelo.personas.Administrador;
+import excepciones.ErrorEnBasesDeDatosException;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 
 /**
  * Ventana principal del sistema: el usuario elige con que rol quiere ingresar.
  */
 public class Gestion  extends Application{
 
-    private GestorBiblioteca servicioBibliotecario = new GestorBiblioteca();
+    //los gestores se crean en start(), porque al crearse leen la base de datos
+    //y si la base no responde hay que poder mostrar un mensaje.
+    private GestorBiblioteca servicioBibliotecario;
     //gestor del personal, lo usa el administrador.
-    private GestorPersonas gestorPersonas = new GestorPersonas();
+    private GestorPersonas gestorPersonas;
 
     //el metodo tiene que llamarse start porque extiende de application
     public void start(Stage stage){
-        //administrador inicial, para poder entrar al sistema la primera vez
-        //(despues se va a cargar desde la base de datos).
-        gestorPersonas.agregarPersona(new Administrador("11111111", "Admin", "Sistema", "admin@biblioteca.com", "admin123"));
+        //se cargan los datos desde la base. Si no hay conexion, se avisa y se cierra el programa.
+        try {
+            servicioBibliotecario = new GestorBiblioteca();
+            gestorPersonas = new GestorPersonas();
+        } catch (ErrorEnBasesDeDatosException ex) {
+            mostrarError("No se pudo conectar con la base de datos",
+                    "Verifique que MySQL este encendido y que exista la base 'biblioteca' (bd/biblioteca.sql).\n\n" + ex.getMessage());
+            Platform.exit();
+            return;
+        }
+
+        //si alguna ventana tiene un error con la base de datos (por ejemplo, se corta la conexion),
+        //se muestra un mensaje en vez de que el programa falle sin avisar.
+        Thread.currentThread().setUncaughtExceptionHandler((hilo, error) -> {
+            Throwable causa = error;
+            while (causa.getCause() != null && !(causa instanceof ErrorEnBasesDeDatosException)) {
+                causa = causa.getCause();
+            }
+            mostrarError("Ocurrió un error", causa.getMessage());
+        });
 
         // se carga la imagen de fondo (el nombre del archivo es Fondo.png, con mayuscula:
         // en Windows da igual, pero en Mac/Linux si no coincide el programa no abre)
@@ -81,5 +102,14 @@ public class Gestion  extends Application{
         stage.setScene(escena);
         stage.setResizable(false);
         stage.show();
+    }
+
+    //muestra una ventana de error.
+    private void mostrarError(String titulo, String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.ERROR);
+        alerta.setTitle("Biblioteca");
+        alerta.setHeaderText(titulo);
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
     }
 }

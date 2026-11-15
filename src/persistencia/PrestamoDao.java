@@ -1,7 +1,6 @@
-package Dao;
+package persistencia;
 import modelo.personas.*;
 import modelo.Libro;
-import Conexion.Conexion;
 import excepciones.ErrorEnBasesDeDatosException;
 import modelo.Prestamo;
 import java.sql.*;
@@ -9,6 +8,10 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * DAO de prestamos: guarda, renueva, modifica, elimina (cuando se devuelve el libro) y lee prestamos
+ * de la tabla "prestamo".
+ */
 public class PrestamoDao {
 
     //inserta los datos del prestamo

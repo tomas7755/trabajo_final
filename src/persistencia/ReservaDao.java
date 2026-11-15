@@ -1,5 +1,4 @@
-package Dao;
-import Conexion.Conexion;
+package persistencia;
 import excepciones.ErrorEnBasesDeDatosException;
 import modelo.Libro;
 import modelo.Reserva;
@@ -8,6 +7,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+/**
+ * DAO de reservas: guarda, modifica, elimina (cuando se cancela o se retira el libro) y lee reservas
+ * de la tabla "reserva".
+ */
 public class ReservaDao {
 
     //inserta los datos de la reserva

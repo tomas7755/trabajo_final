@@ -1,8 +1,8 @@
 package gestores;
-import Dao.LibroDao;
-import Dao.PersonaDao;
-import Dao.PrestamoDao;
-import Dao.ReservaDao;
+import persistencia.LibroDao;
+import persistencia.PersonaDao;
+import persistencia.PrestamoDao;
+import persistencia.ReservaDao;
 import modelo.Libro;
 import modelo.Prestamo;
 import modelo.Reserva;
@@ -29,6 +29,7 @@ public class GestorBiblioteca {
     private PrestamoDao prestamoDAO = new PrestamoDao();
     private ReservaDao reservaDAO = new ReservaDao();
     //constructores:
+    //al crearse, carga todos los datos desde la base de datos (usuarios, libros, prestamos y reservas).
     public GestorBiblioteca(){
         for (Usuario usuariodao : personaDAO.listarUsuarios()) usuarios.put(usuariodao.getDni(), usuariodao);
         for (Libro librodao : libroDAO.listar()) libros.put(librodao.getNumeroIdentificador(), librodao);
@@ -75,8 +76,9 @@ public class GestorBiblioteca {
         if(usuarios.containsKey(agregado.getDni())){
             return false;
         }
-        usuarios.put(agregado.getDni(), agregado);
+        //primero se guarda en la base: si falla, no queda cargado a medias en memoria.
         personaDAO.insertar(agregado);
+        usuarios.put(agregado.getDni(), agregado);
         return true;
     }
     public boolean agregarLibro(Libro agregado){
@@ -84,8 +86,9 @@ public class GestorBiblioteca {
         {
             return false;
         }
-        libros.put(agregado.getNumeroIdentificador(), agregado);
+        //primero se guarda en la base: si falla, no queda cargado a medias en memoria.
         libroDAO.insertar(agregado);
+        libros.put(agregado.getNumeroIdentificador(), agregado);
 
         return true;
     }

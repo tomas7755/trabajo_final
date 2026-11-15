@@ -1,6 +1,7 @@
 package vista.administrador;
 
 import excepciones.ErrorBuscandoUsuario;
+import excepciones.PersonaDuplicadaException;
 import gestores.GestorBiblioteca;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -103,12 +104,17 @@ public class VentanaGestionUsuarios {
             Usuario nuevo = new Usuario(dni.getText(), nombre.getText(), apellido.getText(), email.getText(),
                     contrasenia.getText(), direccion.getText(), telefono.getText());
 
-            //agregarUsuario devuelve false si ya existe un usuario con ese DNI.
-            if (gestorBiblioteca.agregarUsuario(nuevo)) {
-                mostrarMensaje("Registro exitoso", "El usuario se registró correctamente.");
-                limpiarCampos(campos, estado);
-            } else {
-                mostrarMensaje("Error", "Ya existe un usuario con el DNI " + dni.getText() + ".");
+            try {
+                //agregarUsuario devuelve false si ya existe un usuario con ese DNI.
+                if (gestorBiblioteca.agregarUsuario(nuevo)) {
+                    mostrarMensaje("Registro exitoso", "El usuario se registró correctamente.");
+                    limpiarCampos(campos, estado);
+                } else {
+                    mostrarMensaje("Error", "Ya existe un usuario con el DNI " + dni.getText() + ".");
+                }
+            } catch (PersonaDuplicadaException ex) {
+                //el DNI ya lo tiene un bibliotecario o administrador (lo detecta la base de datos).
+                mostrarMensaje("Error", ex.getMessage());
             }
         });
 

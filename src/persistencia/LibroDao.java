@@ -1,5 +1,4 @@
-package Dao;
-import Conexion.Conexion;
+package persistencia;
 import enums.Disponibilidad;
 import excepciones.ErrorEnBasesDeDatosException;
 import modelo.Libro;
@@ -7,6 +6,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO de libros: guarda, actualiza y lee los libros de la tabla "libro" con JDBC.
+ * La baja logica se hace con actualizar() poniendo activo en false (nunca se borra).
+ */
 public class LibroDao {
 
     //insertar el libro.

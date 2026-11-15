@@ -1,10 +1,16 @@
-package Dao;
-import Conexion.Conexion;
+package persistencia;
 import excepciones.ErrorEnBasesDeDatosException;
+import excepciones.PersonaDuplicadaException;
 import modelo.personas.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * DAO de personas: guarda, actualiza y lee usuarios, bibliotecarios y administradores
+ * de la tabla "persona". La columna "tipo" indica que clase hija es cada fila.
+ * La baja logica se hace con actualizarActivo() (nunca se borra).
+ */
 public class PersonaDao {
     //inserta los datos
     public void insertar(Persona persona){
@@ -12,6 +18,10 @@ public class PersonaDao {
         try(Connection con = Conexion.getConexion(); PreparedStatement ps = con.prepareStatement(sql)){
             cargarParametros(ps, persona);
             ps.executeUpdate();
+        }
+        //si el dni ya esta en la tabla (por ejemplo, es de un bibliotecario y se quiere cargar como usuario).
+        catch (SQLIntegrityConstraintViolationException e){
+            throw new PersonaDuplicadaException("Ya existe una persona con el DNI " + persona.getDni() + " en el sistema.");
         }
         catch (SQLException e){
             throw new ErrorEnBasesDeDatosException("Error al guardar persona" + e.getMessage());

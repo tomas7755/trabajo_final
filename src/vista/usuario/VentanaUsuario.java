@@ -1,5 +1,6 @@
 package vista.usuario;
 
+import excepciones.ErrorBuscandoPrestamo;
 import excepciones.LibroNoDisponible;
 import excepciones.SinLibrosException;
 import excepciones.SinUsuarioException;
@@ -24,15 +25,18 @@ import java.util.List;
 
 /**
  * Panel del usuario que ya inicio sesion.
- * Puede buscar libros por titulo, autor o genero, ver sus prestamos y reservas, y reservar libros.
+ * Puede buscar libros por titulo, autor o genero, pedir prestados los disponibles, reservar los que estan
+ * prestados, ver sus prestamos y reservas, y devolver los libros que tiene.
  */
 public class VentanaUsuario {
 
     private GestorBiblioteca gestorBiblioteca;
     //el usuario que inicio sesion.
     private Usuario usuario;
-    //libros que se estan mostrando en la lista (para saber cual se selecciono al reservar).
+    //libros que se estan mostrando en la lista (para saber cual se selecciono al pedir o reservar).
     private List<Libro> librosMostrados = new ArrayList<>();
+    //prestamos que se estan mostrando en "Mis prestamos y reservas" (para saber cual se quiere devolver).
+    private List<Prestamo> prestamosMostrados = new ArrayList<>();
 
     //constructor
     public VentanaUsuario(GestorBiblioteca gestorBiblioteca, Usuario usuario) {
@@ -61,21 +65,25 @@ public class VentanaUsuario {
         resultados.setPrefSize(600, 330);
         resultados.setMaxWidth(600);
 
-        Button reservar = new Button("Reservar seleccionado");
+        Button pedir = new Button("Pedir préstamo");
+        Button reservar = new Button("Reservar");
         Button misLibros = new Button("Mis préstamos y reservas");
+        Button devolver = new Button("Devolver");
         Button volver = new Button("Cerrar sesión");
 
         //estilo
         String estiloBoton = "-fx-background-color: #E6DDF2;" + "-fx-text-fill: #43245E;" + "-fx-font-size: 15px;" + "-fx-font-weight: bold;" + "-fx-background-radius: 10px;" + "-fx-cursor: hand;";
 
-        Button[] botones = {buscar, reservar, misLibros, volver};
+        Button[] botones = {buscar, pedir, reservar, misLibros, devolver, volver};
 
         for (Button boton : botones) {
             boton.setStyle(estiloBoton);
         }
         buscar.setPrefSize(120, 40);
+        pedir.setPrefSize(295, 40);
         reservar.setPrefSize(295, 40);
         misLibros.setPrefSize(295, 40);
+        devolver.setPrefSize(295, 40);
         volver.setPrefSize(300, 40);
 
         textoBusqueda.setStyle("-fx-background-radius: 8px;" + "-fx-font-size: 14px;" + "-fx-padding: 10px;");
@@ -101,6 +109,9 @@ public class VentanaUsuario {
                 librosMostrados = gestorBiblioteca.buscarLibrosPorGenero(textoBusqueda.getText());
             }
 
+            //en esta vista no se puede devolver, asi que se vacia la lista de prestamos mostrados.
+            prestamosMostrados = new ArrayList<>();
+
             ObservableList<String> lista = FXCollections.observableArrayList();
             for (Libro libro : librosMostrados) {
                 lista.add("ID: " + libro.getNumeroIdentificador() + " | " + libro.getNombre()
@@ -112,16 +123,33 @@ public class VentanaUsuario {
             resultados.setItems(lista);
         });
 
-        //RESERVAR: reserva el libro seleccionado en la lista.
-        //el gestor solo deja reservar libros que estan prestados (si esta disponible, se pide el prestamo).
-        reservar.setOnAction(e -> {
-            int posicion = resultados.getSelectionModel().getSelectedIndex();
-
-            if (posicion < 0 || posicion >= librosMostrados.size()) {
+        //PEDIR PRESTAMO: el usuario se lleva el libro seleccionado.
+        //solo se puede si esta disponible, o si esta reservado a su nombre (el gestor lo controla).
+        pedir.setOnAction(e -> {
+            Libro elegido = libroSeleccionado(resultados);
+            if (elegido == null) {
                 mostrarMensaje("Error", "Busque un libro y selecciónelo en la lista.");
                 return;
             }
-            Libro elegido = librosMostrados.get(posicion);
+            try {
+                gestorBiblioteca.agregarPrestamo(usuario.getDni(), elegido.getNumeroIdentificador());
+                mostrarMensaje("Préstamo registrado", "Te llevaste \"" + elegido.getNombre() + "\". Tenés 15 días para devolverlo.");
+                //se actualiza la lista para que se vea el nuevo estado.
+                buscar.fire();
+
+            } catch (SinLibrosException | SinUsuarioException | LibroNoDisponible ex) {
+                mostrarMensaje("No se pudo pedir el préstamo", ex.getMessage());
+            }
+        });
+
+        //RESERVAR: reserva el libro seleccionado en la lista.
+        //el gestor solo deja reservar libros que estan prestados (si esta disponible, se pide el prestamo).
+        reservar.setOnAction(e -> {
+            Libro elegido = libroSeleccionado(resultados);
+            if (elegido == null) {
+                mostrarMensaje("Error", "Busque un libro y selecciónelo en la lista.");
+                return;
+            }
             try {
                 gestorBiblioteca.agregarReservas(usuario.getDni(), elegido.getNumeroIdentificador());
                 mostrarMensaje("Reserva exitosa", "Reservaste \"" + elegido.getNombre() + "\".");
@@ -135,12 +163,14 @@ public class VentanaUsuario {
 
         //MIS PRESTAMOS Y RESERVAS: muestra lo que tiene el usuario.
         misLibros.setOnAction(e -> {
-            //en esta vista no se puede reservar, asi que se vacia la lista de libros mostrados.
+            //en esta vista no se puede pedir ni reservar, asi que se vacia la lista de libros mostrados.
             librosMostrados = new ArrayList<>();
+            //los prestamos van primero en la lista, asi la posicion seleccionada coincide con esta lista.
+            prestamosMostrados = gestorBiblioteca.listarPrestamosDeUsuario(usuario.getDni());
 
             ObservableList<String> lista = FXCollections.observableArrayList();
 
-            for (Prestamo prestamo : gestorBiblioteca.listarPrestamosDeUsuario(usuario.getDni())) {
+            for (Prestamo prestamo : prestamosMostrados) {
                 lista.add("PRÉSTAMO | " + prestamo.getLibro().getNombre() + " | Desde: " + prestamo.getFechaPrestamo()
                         + " | Devolver antes de: " + prestamo.getFechaDevolucion());
             }
@@ -153,19 +183,42 @@ public class VentanaUsuario {
             resultados.setItems(lista);
         });
 
+        //DEVOLVER: devuelve el libro del prestamo seleccionado en "Mis prestamos y reservas".
+        devolver.setOnAction(e -> {
+            int posicion = resultados.getSelectionModel().getSelectedIndex();
+
+            if (posicion < 0 || posicion >= prestamosMostrados.size()) {
+                mostrarMensaje("Error", "Toque \"Mis préstamos y reservas\" y seleccione un préstamo.");
+                return;
+            }
+            Prestamo elegido = prestamosMostrados.get(posicion);
+            try {
+                gestorBiblioteca.devolverLibro(elegido.getLibro().getNumeroIdentificador());
+                mostrarMensaje("Devolución registrada", "Devolviste \"" + elegido.getLibro().getNombre() + "\".");
+                //se actualiza la lista.
+                misLibros.fire();
+
+            } catch (ErrorBuscandoPrestamo ex) {
+                mostrarMensaje("No se pudo devolver", ex.getMessage());
+            }
+        });
+
         volver.setOnAction(e -> ventana.close());
 
         //distribucion
         HBox filaBusqueda = new HBox(10, buscarPor, textoBusqueda, buscar);
         filaBusqueda.setAlignment(Pos.CENTER);
 
-        HBox filaAcciones = new HBox(10, reservar, misLibros);
+        HBox filaAcciones = new HBox(10, pedir, reservar);
         filaAcciones.setAlignment(Pos.CENTER);
+
+        HBox filaMisLibros = new HBox(10, misLibros, devolver);
+        filaMisLibros.setAlignment(Pos.CENTER);
 
         VBox contenido = new VBox(15);
         contenido.setAlignment(Pos.CENTER);
 
-        contenido.getChildren().addAll(titulo, filaBusqueda, resultados, filaAcciones, volver);
+        contenido.getChildren().addAll(titulo, filaBusqueda, resultados, filaAcciones, filaMisLibros, volver);
 
         //lineas de decoracion
         Region lineaSuperior = new Region();
@@ -183,7 +236,7 @@ public class VentanaUsuario {
 
         root.setStyle("-fx-background-color: #352044;");
 
-        Scene escena = new Scene(root, 700, 650);
+        Scene escena = new Scene(root, 700, 700);
 
         ventana.setTitle("Panel del usuario");
         ventana.setScene(escena);
@@ -197,5 +250,14 @@ public class VentanaUsuario {
         alerta.setHeaderText(titulo);
         alerta.setContentText(mensaje);
         alerta.showAndWait();
+    }
+
+    //devuelve el libro seleccionado en la lista de busqueda, o null si no hay ninguno.
+    private Libro libroSeleccionado(ListView<String> resultados) {
+        int posicion = resultados.getSelectionModel().getSelectedIndex();
+        if (posicion < 0 || posicion >= librosMostrados.size()) {
+            return null;
+        }
+        return librosMostrados.get(posicion);
     }
 }

@@ -1,5 +1,5 @@
 package gestores;
-import Dao.PersonaDao;
+import persistencia.PersonaDao;
 import excepciones.PersonaDuplicadaException;
 import excepciones.PersonaNoEncontradaException;
 import modelo.personas.Administrador;
@@ -22,7 +22,7 @@ public class GestorPersonas {
     //se crea el objeto dao
     private PersonaDao personaDAO = new PersonaDao();
 
-    //constructor:
+    //constructor: al crearse, carga el personal (bibliotecarios y administradores) desde la base de datos.
     public GestorPersonas() {
         for (Persona p : personaDAO.listarPersonal()) {
             personas.put(p.getDni(), p);
@@ -41,8 +41,9 @@ public class GestorPersonas {
             throw new PersonaDuplicadaException("El email " + nueva.getEmail() + " ya esta registrado.");
         }
         //si esta todo bien, la guarda en el Map y su email en el Set.
-        personas.put(nueva.getDni(), nueva);
+        //primero se guarda en la base: si falla, no queda cargado a medias en memoria.
         personaDAO.insertar(nueva);
+        personas.put(nueva.getDni(), nueva);
         emailsRegistrados.add(nueva.getEmail().toLowerCase());
     }
 
@@ -80,8 +81,8 @@ public class GestorPersonas {
         emailsRegistrados.add(emailNuevo);
         //se mantiene el estado (activo/inactivo) que tenia.
         nueva.setActivo(vieja.isActivo());
-        personas.put(dni, nueva);
         personaDAO.actualizar(nueva);
+        personas.put(dni, nueva);
     }
 
     //CONSULTA: busca una persona por su dni.
