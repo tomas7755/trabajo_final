@@ -23,6 +23,13 @@ public final class Prestamo {
         this.fechaPrestamo = LocalDate.now();
         this.fechaDevolucion = fechaPrestamo.plusDays(15);
     }
+    public Prestamo(int numeroPrestamo, Usuario usuario, Libro libro, LocalDate fechaPrestamo, LocalDate fechaDevolucion){
+        this.numeroPrestamo = numeroPrestamo;
+        this.usuario = usuario;
+        this.libro = libro;
+        this.fechaPrestamo = fechaPrestamo;
+        this.fechaDevolucion = fechaDevolucion;
+    }
     //getters:
     public int getNumeroPrestamo(){
         return numeroPrestamo;

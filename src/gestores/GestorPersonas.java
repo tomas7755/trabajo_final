@@ -1,11 +1,10 @@
 package gestores;
-
+import Dao.PersonaDao;
 import excepciones.PersonaDuplicadaException;
 import excepciones.PersonaNoEncontradaException;
 import modelo.personas.Administrador;
 import modelo.personas.Bibliotecario;
 import modelo.personas.Persona;
-
 import java.util.*;
 
 /**
@@ -14,17 +13,22 @@ import java.util.*;
  * Permite el ABMCL: Alta, Baja (logica), Modificacion, Consulta y Listado.
  */
 public class GestorPersonas {
-    //Map: guardamos a las personas con su dni como clave, asi la busqueda por dni es directa
-    //(no hace falta recorrer toda la coleccion).
+    //Map: guardamos a las personas con su dni como clave, asi la busqueda por dni es directa (no hace falta recorrer toda la coleccion).
     //Es de tipo Persona, asi en el mismo Map entran bibliotecarios y administradores (polimorfismo).
     private Map<String, Persona> personas = new HashMap<>();
     //Set: guardamos los emails ya usados. Un Set no admite elementos repetidos,
     //y eso es justo lo que necesitamos: dos personas no pueden tener el mismo email (se usa para el login).
     private Set<String> emailsRegistrados = new HashSet<>();
+    //se crea el objeto dao
+    private PersonaDao personaDAO = new PersonaDao();
 
     //constructor:
-    public GestorPersonas() {}
-
+    public GestorPersonas() {
+        for (Persona p : personaDAO.listarPersonal()) {
+            personas.put(p.getDni(), p);
+            emailsRegistrados.add(p.getEmail().toLowerCase());
+        }
+    }
     //metodos:
     //ALTA: agrega una persona nueva al sistema.
     public void agregarPersona(Persona nueva) throws PersonaDuplicadaException {
@@ -38,6 +42,7 @@ public class GestorPersonas {
         }
         //si esta todo bien, la guarda en el Map y su email en el Set.
         personas.put(nueva.getDni(), nueva);
+        personaDAO.insertar(nueva);
         emailsRegistrados.add(nueva.getEmail().toLowerCase());
     }
 
@@ -46,12 +51,14 @@ public class GestorPersonas {
     public void darDeBaja(String dni) throws PersonaNoEncontradaException {
         Persona buscada = buscarPorDni(dni);
         buscada.setActivo(false);
+        personaDAO.actualizarActivo(dni, false);
     }
 
     //vuelve a activar a una persona que habia sido dada de baja.
     public void reactivar(String dni) throws PersonaNoEncontradaException {
         Persona buscada = buscarPorDni(dni);
         buscada.setActivo(true);
+        personaDAO.actualizarActivo(dni, true);
     }
 
     //MODIFICACION: reemplaza los datos de una persona por los nuevos.
@@ -74,6 +81,7 @@ public class GestorPersonas {
         //se mantiene el estado (activo/inactivo) que tenia.
         nueva.setActivo(vieja.isActivo());
         personas.put(dni, nueva);
+        personaDAO.actualizar(nueva);
     }
 
     //CONSULTA: busca una persona por su dni.

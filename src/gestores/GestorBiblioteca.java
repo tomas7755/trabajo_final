@@ -1,4 +1,8 @@
 package gestores;
+import Dao.LibroDao;
+import Dao.PersonaDao;
+import Dao.PrestamoDao;
+import Dao.ReservaDao;
 import modelo.Libro;
 import modelo.Prestamo;
 import modelo.Reserva;
@@ -20,13 +24,23 @@ public class GestorBiblioteca {
     private Map<Integer, Libro> libros = new HashMap<>();
     private Map<Integer, Prestamo> prestamos = new HashMap<>();
     private Map<Integer, Reserva> reservas = new HashMap<>();
+    private PersonaDao personaDAO = new PersonaDao();
+    private LibroDao libroDAO = new LibroDao();
+    private PrestamoDao prestamoDAO = new PrestamoDao();
+    private ReservaDao reservaDAO = new ReservaDao();
     //constructores:
-    public GestorBiblioteca(){}
-    public GestorBiblioteca(Map<String, Usuario> usuarios, Map<Integer, Libro> libros, Map<Integer, Prestamo> prestamos, Map<Integer, Reserva> reservas) {
-        this.usuarios = usuarios;
-        this.libros = libros;
-        this.prestamos = prestamos;
-        this.reservas = reservas;
+    public GestorBiblioteca(){
+        for (Usuario usuariodao : personaDAO.listarUsuarios()) usuarios.put(usuariodao.getDni(), usuariodao);
+        for (Libro librodao : libroDAO.listar()) libros.put(librodao.getNumeroIdentificador(), librodao);
+        for (Prestamo prestamodao : prestamoDAO.listar(usuarios, libros)) {
+            prestamos.put(prestamodao.getNumeroPrestamo(), prestamodao);
+            //los contadores siguen desde el ultimo numero usado.
+            contadorPrestamos = Math.max(contadorPrestamos, prestamodao.getNumeroPrestamo());
+        }
+        for (Reserva r : reservaDAO.listar(usuarios, libros)) {
+            reservas.put(r.getNumeroReserva(), r);
+            contadorReserva = Math.max(contadorReserva, r.getNumeroReserva());
+        }
     }
     //getters:
     public Map<String, Usuario> getUsuarios() {
@@ -62,6 +76,7 @@ public class GestorBiblioteca {
             return false;
         }
         usuarios.put(agregado.getDni(), agregado);
+        personaDAO.insertar(agregado);
         return true;
     }
     public boolean agregarLibro(Libro agregado){
@@ -70,6 +85,7 @@ public class GestorBiblioteca {
             return false;
         }
         libros.put(agregado.getNumeroIdentificador(), agregado);
+        libroDAO.insertar(agregado);
 
         return true;
     }
@@ -118,15 +134,18 @@ public class GestorBiblioteca {
             }
             //si si es la misma persona, y la reserva esta cargada, elimina el libro de los reservados
             reservas.remove(encontrada.getNumeroReserva());
+            reservaDAO.eliminar(encontrada.getNumeroReserva());
         }
         //y se agrega a la desponibilidad de prestado.
         libro.setEstaDispponible(Disponibilidad.PRESTADO);
+        libroDAO.actualizar(libro);
         //se asigna su numero de prestamo
         contadorPrestamos++;
 
         Prestamo prestado = new Prestamo(contadorPrestamos, usuarioBuscado, libro);
         //se carga el nuevo prestamo
         prestamos.put(contadorPrestamos, prestado);
+        prestamoDAO.insertar(prestado);
 
         return true;
     }
@@ -171,6 +190,7 @@ public class GestorBiblioteca {
         Reserva reservado = new Reserva(contadorReserva, usuarioBuscado, libro);
         //se carga la nueva reserva
         reservas.put(contadorReserva, reservado);
+        reservaDAO.insertar(reservado);
 
         return true;
     }
@@ -432,6 +452,7 @@ public class GestorBiblioteca {
         viejo.setContrasenia(nuevo.getContrasenia());
         viejo.setDireccion(nuevo.getDireccion());
         viejo.setTelefono(nuevo.getTelefono());
+        personaDAO.actualizar(viejo);
         return true;
     }
     public boolean modificarLibro(int numeroIdentificador, Libro nuevo) throws ErrorBuscandoLibro {
@@ -450,36 +471,66 @@ public class GestorBiblioteca {
         viejo.setNombre(nuevo.getNombre());
         viejo.setAutor(nuevo.getAutor());
         viejo.setGenero(nuevo.getGenero());
+        libroDAO.actualizar(viejo);
 
         return true;
     }
-    public boolean modificarReserva(int numeroReserva, Reserva nueva) throws ErrorBuscandoReserva {
+    public boolean modificarReserva(int numeroReserva, Reserva nueva) throws ErrorBuscandoReserva, SinUsuarioException, LibroNoDisponible {
         //busca la reserva, si no existe devuelve una excepcion.
-        if (!reservas.containsKey(numeroReserva)){
+        Reserva vieja = reservas.get(numeroReserva);
+        if (vieja == null){
             throw new ErrorBuscandoReserva("No existe una reserva asociada a ese numero.");
         }
-        //comprueba que la nueva reserva no este vacia y que coincida la key(numero reserva),
-        //si no, tira la excepcion.
-        if (nueva == null || nueva.getNumeroReserva() != numeroReserva){
+        //comprueba que los datos nuevos no esten vacios y que coincida la key(numero reserva).
+        if (nueva == null || nueva.getNumeroReserva() != numeroReserva || nueva.getUsuario() == null){
             throw new ErrorBuscandoReserva("Los datos de la reserva son erroneos.");
         }
-        //si todo esta correcto, lo sobreescribe..
-        reservas.put(numeroReserva, nueva);
+        //el usuario nuevo tiene que existir y estar activo.
+        Usuario usuarioNuevo = usuarios.get(nueva.getUsuario().getDni());
+        if (usuarioNuevo == null){
+            throw new SinUsuarioException("Este usuario no existe.");
+        }
+        if (!usuarioNuevo.isActivo()){
+            throw new SinUsuarioException("El usuario esta dado de baja.");
+        }
+        //si el libro esta prestado al usuario nuevo, no tiene sentido que lo reserve.
+        Prestamo prestamoActual = buscarPrestamoDeLibro(vieja.getLibro());
+        if (prestamoActual != null && prestamoActual.getUsuario().getDni().equals(usuarioNuevo.getDni())){
+            throw new LibroNoDisponible("Ese usuario ya tiene este libro prestado, no lo puede reservar.");
+        }
+        //se actualiza el mismo objeto. El libro no se cambia: su estado depende de esta reserva.
+        vieja.setUsuario(usuarioNuevo);
+        reservaDAO.actualizar(vieja);
 
         return true;
     }
-    public boolean modificarPrestamo(int numeroPrestamo, Prestamo nuevo) throws ErrorBuscandoPrestamo {
+    public boolean modificarPrestamo(int numeroPrestamo, Prestamo nuevo) throws ErrorBuscandoPrestamo, SinUsuarioException {
         //busca el prestamo, si no existe devuelve una excepcion.
-        if(!prestamos.containsKey(numeroPrestamo)){
+        Prestamo viejo = prestamos.get(numeroPrestamo);
+        if (viejo == null){
             throw new ErrorBuscandoPrestamo("No existe un prestamo ligado a ese numero.");
         }
-        //comprueba que el nuevo prestamo no este vacio y que coincida la key(numero prestamo),
-        //si no, tira la excepcion.
-        if (nuevo == null || nuevo.getNumeroPrestamo() != numeroPrestamo){
+        //comprueba que los datos nuevos no esten vacios y que coincida la key(numero prestamo).
+        if (nuevo == null || nuevo.getNumeroPrestamo() != numeroPrestamo || nuevo.getUsuario() == null || nuevo.getFechaPrestamo() == null || nuevo.getFechaDevolucion() == null){
             throw new ErrorBuscandoPrestamo("Los datos del prestamo son erroneos.");
         }
-        //si todo esta correcto, lo sobreescribe..
-        prestamos.put(numeroPrestamo, nuevo);
+        //la fecha de devolucion no puede ser anterior a la del prestamo.
+        if (nuevo.getFechaDevolucion().isBefore(nuevo.getFechaPrestamo())){
+            throw new ErrorBuscandoPrestamo("La fecha de devolucion no puede ser anterior a la del prestamo.");
+        }
+        //el usuario nuevo tiene que existir y estar activo.
+        Usuario usuarioNuevo = usuarios.get(nuevo.getUsuario().getDni());
+        if (usuarioNuevo == null){
+            throw new SinUsuarioException("Este usuario no existe.");
+        }
+        if (!usuarioNuevo.isActivo()){
+            throw new SinUsuarioException("El usuario esta dado de baja.");
+        }
+        //se actualiza el mismo objeto. El libro no se cambia: su estado depende de este prestamo.
+        viejo.setUsuario(usuarioNuevo);
+        viejo.setFechaPrestamo(nuevo.getFechaPrestamo());
+        viejo.setFechaDevolucion(nuevo.getFechaDevolucion());
+        prestamoDAO.actualizar(viejo);
 
         return true;
     }
@@ -505,6 +556,7 @@ public class GestorBiblioteca {
         //si no tiene nada asociado, se da de baja (baja logica): no se borra del Map,
         //se marca como inactivo para no perder sus datos ni su historial.
         usuarios.get(dni).setActivo(false);
+        personaDAO.actualizarActivo(dni, false);
 
         return true;
     }
@@ -515,6 +567,7 @@ public class GestorBiblioteca {
             throw new ErrorBuscandoUsuario("El usuario que quiere reactivar no existe.");
         }
         usuarios.get(dni).setActivo(true);
+        personaDAO.actualizarActivo(dni, true);
 
         return true;
     }
@@ -531,6 +584,7 @@ public class GestorBiblioteca {
         //si todo esta correcto, se da de baja (baja logica): no se borra del Map,
         //se marca como inactivo para no perder sus datos ni su historial.
         buscado.setActivo(false);
+        libroDAO.actualizar(buscado);
 
         return true;
     }
@@ -540,6 +594,7 @@ public class GestorBiblioteca {
             throw new ErrorBuscandoLibro("El libro que quiere reactivar no existe.");
         }
         libros.get(numeroIdentificador).setActivo(true);
+        libroDAO.actualizar(libros.get(numeroIdentificador));
         return true;
     }
     //DEVOLUCION por numero de libro: busca el prestamo de ese libro y lo elimina.
@@ -564,6 +619,7 @@ public class GestorBiblioteca {
             throw new LibroNoDisponible("No se puede renovar: otro usuario reservo el libro.");
         }
         prestamo.renovar(15);
+        prestamoDAO.actualizarFechaDevolucion(prestamo);
         return true;
     }
     //cancela la reserva de un libro (buscandola por el numero del libro).
@@ -584,10 +640,12 @@ public class GestorBiblioteca {
         Libro libro = reservas.get(numeroReserva).getLibro();
         //si se encuentra, se elimina.
         reservas.remove(numeroReserva);
+        reservaDAO.eliminar(numeroReserva);
         //si el libro estaba esperando al que lo reservo, vuelve a estar disponible.
         //si todavia esta prestado, sigue prestado.
         if (libro.getEstaDispponible() == Disponibilidad.RESERVADO){
             libro.setEstaDispponible(Disponibilidad.DISPONIBLE);
+            libroDAO.actualizar(libro);
         }
 
         return true;
@@ -601,12 +659,15 @@ public class GestorBiblioteca {
         Libro libro = prestamos.get(numeroPrestamo).getLibro();
         //se elimina el prestamo.
         prestamos.remove(numeroPrestamo);
+        prestamoDAO.eliminar(numeroPrestamo);
         //si alguien lo tenia reservado, el libro queda RESERVADO para esa persona.
         //si no, vuelve a estar disponible.
         if (buscarReservaDeLibro(libro) != null){
             libro.setEstaDispponible(Disponibilidad.RESERVADO);
+            libroDAO.actualizar(libro);
         } else {
             libro.setEstaDispponible(Disponibilidad.DISPONIBLE);
+            libroDAO.actualizar(libro);
         }
         return true;
     }
